@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Download Kolga</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20220%20200'%20width='220'%20height='200'%3E%3Crect%20width='220'%20height='200'%20fill='%232e2018'%3E%3C/rect%3E%3Cg%20transform='translate(110,100)%20rotate(-30)%20translate(-75,-40)'%3E%3Cpath%20d='M2,0%20h85%20a9,9%200%200%201%200,18%20h-85%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3Cpath%20d='M110,0%20h15%20a9,9%200%200%201%200,18%20h-15%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b98f7e'%3E%3C/path%3E%3Cpath%20d='M16,31%20h67%20a9,9%200%200%201%200,18%20h-67%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M106,31%20h33%20a9,9%200%200%201%200,18%20h-33%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M30,62%20h53%20a9,9%200%200%201%200,18%20h-53%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b3a08f'%3E%3C/path%3E%3Cpath%20d='M106,62%20h47%20a9,9%200%200%201%200,18%20h-47%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3C/g%3E%3C/svg%3E">
+<meta name="description" content="Kolga detects your operating system and CPU architecture and points you at the right installer.">
+<style>
+  /* ------------------------------------------------------------------
+     Kolga's palette, lifted from renderer/index.css so the download page
+     and the app are the same product: warm-neutral grays on hue 285 and
+     the terracotta primary drawn from the logo (#c98b72 in dark, the
+     colour of the mark's middle bars).
+
+     Each token is declared twice — a hex/rgba fallback first, then the
+     app's own oklch value. Browsers that do not parse oklch keep the
+     fallback, which matters here because the visitors most likely to run
+     an old browser are exactly the ones this page has to serve.
+     ------------------------------------------------------------------ */
+  :root {
+    color-scheme: light;
+    --bg: #fcfcfe;              --bg: oklch(0.992 0.002 285);
+    --surface: #ffffff;         --surface: oklch(1 0 0);
+    --surface-2: #f6f6f9;       --surface-2: oklch(0.975 0.003 285);
+    --border: #e2e2e6;          --border: oklch(0.915 0.005 285);
+    --border-strong: #d0d0d5;   --border-strong: oklch(0.86 0.007 285);
+    --text: #1c1c22;            --text: oklch(0.23 0.012 285);
+    --text-dim: #717178;        --text-dim: oklch(0.55 0.012 285);
+    --accent: #a85836;          --accent: oklch(0.55 0.115 43);
+    --accent-text: #fcfcfc;     --accent-text: oklch(0.99 0 0);
+    --accent-soft: #ffe9dd;     --accent-soft: oklch(0.95 0.03 50);
+    --good: #187c49;            --good: oklch(0.52 0.12 155);
+    --good-soft: #e1f7e7;       --good-soft: oklch(0.955 0.03 155);
+    --warn: #905d00;            --warn: oklch(0.52 0.12 75);
+    --warn-soft: #fff0cc;       --warn-soft: oklch(0.96 0.05 85);
+    --danger: #be2323;          --danger: oklch(0.52 0.19 27);
+    --danger-soft: #ffe9e6;     --danger-soft: oklch(0.955 0.03 25);
+    /* The mark's cream bars invert on a dark ground, exactly as LogoMark does. */
+    --logo-cream: #2e2018;
+    --radius: 0.7rem;
+    --shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 24px -12px rgba(0,0,0,0.18);
+    --maxw: 940px;
+    --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #18181c;              --bg: oklch(0.21 0.008 285);
+    --surface: #212126;         --surface: oklch(0.25 0.01 285);
+    --surface-2: #27272d;       --surface-2: oklch(0.275 0.011 285);
+    --border: rgba(255,255,255,0.09);       --border: oklch(1 0 0 / 9%);
+    --border-strong: rgba(255,255,255,0.16);--border-strong: oklch(1 0 0 / 16%);
+    --text: #f1f1f5;            --text: oklch(0.96 0.005 285);
+    --text-dim: #a3a4ac;        --text-dim: oklch(0.72 0.012 285);
+    --accent: #c98b72;          --accent: oklch(0.692 0.084 43);
+    --accent-text: #1e130d;     --accent-text: oklch(0.2 0.022 48);
+    --accent-soft: #493126;     --accent-soft: oklch(0.34 0.04 46);
+    --good: #57bc80;            --good: oklch(0.72 0.13 155);
+    --good-soft: #1c3a27;       --good-soft: oklch(0.32 0.05 155);
+    --warn: #e9b452;            --warn: oklch(0.8 0.13 80);
+    --warn-soft: #443210;       --warn-soft: oklch(0.33 0.055 80);
+    --danger: #ff6367;          --danger: oklch(0.7 0.19 22);
+    --danger-soft: #512320;     --danger-soft: oklch(0.32 0.07 25);
+    --logo-cream: #f5efe3;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #18181c;              --bg: oklch(0.21 0.008 285);
+    --surface: #212126;         --surface: oklch(0.25 0.01 285);
+    --surface-2: #27272d;       --surface-2: oklch(0.275 0.011 285);
+    --border: rgba(255,255,255,0.09);       --border: oklch(1 0 0 / 9%);
+    --border-strong: rgba(255,255,255,0.16);--border-strong: oklch(1 0 0 / 16%);
+    --text: #f1f1f5;            --text: oklch(0.96 0.005 285);
+    --text-dim: #a3a4ac;        --text-dim: oklch(0.72 0.012 285);
+    --accent: #c98b72;          --accent: oklch(0.692 0.084 43);
+    --accent-text: #1e130d;     --accent-text: oklch(0.2 0.022 48);
+    --accent-soft: #493126;     --accent-soft: oklch(0.34 0.04 46);
+    --good: #57bc80;            --good: oklch(0.72 0.13 155);
+    --good-soft: #1c3a27;       --good-soft: oklch(0.32 0.05 155);
+    --warn: #e9b452;            --warn: oklch(0.8 0.13 80);
+    --warn-soft: #443210;       --warn-soft: oklch(0.33 0.055 80);
+    --danger: #ff6367;          --danger: oklch(0.7 0.19 22);
+    --danger-soft: #512320;     --danger-soft: oklch(0.32 0.07 25);
+    --logo-cream: #f5efe3;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -14px rgba(0,0,0,0.55);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 16px;
+    padding-block: clamp(32px, 7vw, 72px);
+  }
+  a { color: inherit; }
+  code, .mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  /* ---------- hero ---------- */
+  .mark {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-weight: 620; letter-spacing: -0.01em;
+  }
+  .mark .glyph { width: 30px; height: 30px; flex: none; }
+  h1 {
+    font-size: clamp(30px, 5.2vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    margin: 22px 0 10px;
+  }
+  .lede { color: var(--text-dim); max-width: 56ch; margin: 0; font-size: 16px; }
+
+  /* ---------- recommendation card ---------- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-top: 28px;
+  }
+  .card-head {
+    padding: 20px 22px 0;
+    display: flex; flex-wrap: wrap; gap: 10px 14px;
+    align-items: baseline; justify-content: space-between;
+  }
+  .eyebrow {
+    font-size: 11px; font-weight: 640; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .card-body { padding: 10px 22px 22px; }
+  .pick-title {
+    font-size: clamp(19px, 3vw, 23px); font-weight: 640; letter-spacing: -0.015em;
+    margin: 4px 0 4px;
+  }
+  .pick-sub { color: var(--text-dim); margin: 0 0 18px; }
+  .pick-sub .file { color: var(--text); }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--accent); color: var(--accent-text);
+    border: 1px solid transparent; border-radius: calc(var(--radius) - 2px);
+    padding: 12px 18px; font: inherit; font-weight: 620;
+    text-decoration: none; cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn.secondary {
+    background: transparent; color: var(--text); border-color: var(--border-strong); font-weight: 520;
+  }
+  .btn.secondary:hover { background: var(--surface-2); filter: none; }
+  .btn .sz { font-weight: 450; opacity: 0.75; font-size: 13px; }
+
+  .skeleton {
+    color: var(--text-dim);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .spinner {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--border-strong); border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
+  /* ---------- detected specs ---------- */
+  .specs {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden; /* clips the trailing separators drawn below */
+  }
+  /* Separators as clipped shadows rather than grid gaps, so an incomplete
+     last row leaves no stray coloured cell. */
+  .spec {
+    padding: 13px 22px 15px;
+    box-shadow: 1px 0 0 var(--border), 0 1px 0 var(--border);
+  }
+  .spec dt { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); }
+  .spec dd { margin: 3px 0 0; font-weight: 560; overflow-wrap: anywhere; hyphens: auto; }
+  .spec.gpu dd { font-weight: 480; font-size: 13.5px; line-height: 1.4; }
+  .spec dd small { display: block; font-weight: 400; color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 620; letter-spacing: 0.03em;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--good-soft); color: var(--good);
+    border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+  }
+  .badge.guess { background: var(--warn-soft); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+
+  .notice {
+    margin-top: 18px; padding: 13px 16px;
+    background: var(--warn-soft); color: var(--warn);
+    border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+    border-radius: calc(var(--radius) - 2px); font-size: 14px;
+  }
+  .notice b { font-weight: 640; }
+
+  /* ---------- requirement checklist ---------- */
+  .reqs { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 9px; }
+  .req { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+  .req-mark {
+    flex: none; width: 18px; height: 18px; margin-top: 2px;
+    border-radius: 50%; display: grid; place-items: center;
+    font-size: 11px; font-weight: 700; line-height: 1;
+  }
+  .req-label { font-weight: 560; }
+  .req small { display: block; color: var(--text-dim); }
+  .req-pass .req-mark    { background: var(--good-soft); color: var(--good); }
+  .req-fail .req-mark    { background: var(--danger-soft); color: var(--danger); }
+  .req-fail .req-label   { color: var(--danger); }
+  .req-warn .req-mark    { background: var(--warn-soft); color: var(--warn); }
+  .req-unknown .req-mark { background: var(--surface-2); color: var(--text-dim); }
+  .req-unknown .req-label { font-weight: 500; color: var(--text-dim); }
+
+  /* ---------- steps ---------- */
+  .steps { margin: 18px 0 0; padding-left: 20px; color: var(--text-dim); font-size: 14px; }
+  .steps li { margin: 5px 0; }
+  .steps strong { color: var(--text); font-weight: 560; }
+
+  /* ---------- override + all builds ---------- */
+  .row-tools {
+    margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+    font-size: 14px; color: var(--text-dim);
+  }
+  select {
+    font: inherit; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border-strong); border-radius: calc(var(--radius) - 4px); padding: 7px 10px;
+  }
+
+  details.all { margin-top: 26px; }
+  details.all > summary {
+    cursor: pointer; font-weight: 560; padding: 12px 0;
+    border-top: 1px solid var(--border);
+  }
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; }
+  tbody tr.is-pick { background: var(--accent-soft); }
+  td a { font-weight: 560; }
+
+  footer { margin-top: 34px; color: var(--text-dim); font-size: 13px; }
+  footer p { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mark">
+    <!-- Kolga's mark: the same bars and -30deg rotation as
+         renderer/App/components/LogoMark, with the cream bars inverting on a
+         dark ground exactly as the app's fill-[#2e2018] dark:fill-[#f5efe3] does. -->
+    <svg class="glyph" viewBox="10 0 200 200" role="img" aria-label="Kolga logo">
+      <g transform="translate(110,100) rotate(-30) translate(-75,-40)">
+        <path d="M2,0 h85 a9,9 0 0 1 0,18 h-85 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
+        <path d="M110,0 h15 a9,9 0 0 1 0,18 h-15 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#b98f7e"></path>
+        <path d="M16,31 h67 a9,9 0 0 1 0,18 h-67 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#c98b72"></path>
+        <path d="M106,31 h33 a9,9 0 0 1 0,18 h-33 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#c98b72"></path>
+        <path d="M30,62 h53 a9,9 0 0 1 0,18 h-53 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#b3a08f"></path>
+        <path d="M106,62 h47 a9,9 0 0 1 0,18 h-47 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
+      </g>
+    </svg>
+    <span>Kolga</span>
+  </div>
+
+  <h1>Download Kolga</h1>
+  <p class="lede">
+    A local-first AI workbench that runs the model on your own machine. Pick a build below &mdash;
+    we check what you&rsquo;re running and point at the matching installer.
+  </p>
+
+  <section class="card" aria-labelledby="pick-title">
+    <div class="card-head">
+      <span class="eyebrow" id="card-eyebrow">Recommended for your machine</span>
+      <span class="eyebrow" id="version-tag"></span>
+    </div>
+    <div class="card-body">
+      <div id="pick-region" aria-live="polite">
+        <p class="skeleton" id="pick-loading"><span class="spinner" aria-hidden="true"></span> Checking your system&hellip;</p>
+      </div>
+      <div class="row-tools">
+        <label for="os-override">Wrong guess?</label>
+        <select id="os-override">
+          <option value="auto">Detect automatically</option>
+          <option value="mac-arm64">macOS &middot; Apple Silicon</option>
+          <option value="mac-x64">macOS &middot; Intel</option>
+          <option value="win-x64">Windows &middot; 64-bit (x64)</option>
+          <option value="win-arm64">Windows &middot; ARM64</option>
+          <option value="linux-x64">Linux &middot; x86_64</option>
+          <option value="linux-arm64">Linux &middot; ARM64</option>
+        </select>
+      </div>
+    </div>
+    <dl class="specs" id="specs"></dl>
+  </section>
+
+  <noscript>
+    <div class="notice" style="margin-top:22px">
+      JavaScript is off, so nothing can be detected. Kolga needs 8 GB of memory, a 64-bit
+      processor and macOS 11, Windows 10 or glibc 2.28 or newer. Pick your build from the full list below.
+    </div>
+  </noscript>
+
+  <details class="all" id="all-builds">
+    <summary id="all-summary">All builds</summary>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Platform</th><th>Architecture</th><th>Format</th><th>File</th></tr>
+        </thead>
+        <tbody id="all-rows"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <footer>
+    <p id="req-line"></p>
+    <p><strong>Detection runs entirely in your browser.</strong> Nothing about your hardware is sent anywhere.</p>
+    <p>
+      Browsers only report coarse hints, so the guess can be wrong &mdash; the override above and the full
+      list are always there. Install steps, signing status and the supported matrix live in
+      <code>RELEASE.md</code>.
+    </p>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ *
+   * 1. Release config — the only thing you edit when you cut a release.
+   *    File names mirror electron-builder's artifactName patterns:
+   *      macOS   ${name}.macOS.${version}.${arch}.${ext}
+   *      Windows ${name}.Windows.${version}.${arch}.${ext}
+   *      Linux   ${name}.Linux.${version}.${arch}.${ext}
+   * ------------------------------------------------------------------ */
+  var RELEASE = {
+    appName: "Kolga",
+    artifactName: "kolga",                     // electron-builder ${name}
+    version: "0.8.0",
+    baseUrl: "https://github.com/MitchWeber/dev-ai-workbench/releases/download/v0.8.0/"
+  };
+
+  /* ------------------------------------------------------------------ *
+   * 1b. Minimum requirements. Kolga runs the model locally, so the floor
+   *     is real: the smallest catalog model is ~2 GB of weights plus
+   *     FIT_HEADROOM_BYTES (1.5 GB) plus a context window.
+   *     OS floors track Electron 43's own supported platforms.
+   * ------------------------------------------------------------------ */
+  var REQUIREMENTS = {
+    memoryGb: 8,
+    cores: 4,                       // advisory only — see checkSystem()
+    arch: { x64: true, arm64: true }, // 64-bit only; no 32-bit build exists
+    os: {
+      "macOS":   { minMajor: 11, label: "macOS 11 (Big Sur) or newer" },
+      "Windows": { minMajor: 10, label: "Windows 10 or newer" },
+      "Linux":   { minMajor: null, label: "glibc 2.28 or newer (Ubuntu 20.04+, Debian 10+, Fedora 32+)" }
+    }
+  };
+
+  function fileFor(osLabel, arch, ext) {
+    return [RELEASE.artifactName, osLabel, RELEASE.version, arch, ext].join(".");
+  }
+  function urlFor(file) {
+    return RELEASE.baseUrl + file;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 2. The build matrix (RELEASE.md "Supported matrix").
+   *    `primary: true` marks the default download for that OS + arch.
+   * ------------------------------------------------------------------ */
+  var BUILDS = [
+    { id: "mac-arm64",   os: "macOS",   osLabel: "macOS",   arch: "arm64", archLabel: "Apple Silicon (M-series)", ext: "dmg",    format: "Disk image (.dmg)", primary: true,
+      hint: "Open it and drag Kolga onto the Applications shortcut." },
+    { id: "mac-x64",     os: "macOS",   osLabel: "macOS",   arch: "x64",   archLabel: "Intel (x86_64)",           ext: "dmg",    format: "Disk image (.dmg)", primary: true,
+      hint: "Open it and drag Kolga onto the Applications shortcut." },
+    // The zips exist for electron-updater, which cannot install from a DMG. They are
+    // deliberately NOT offered as an alternate: a zip unpacked into ~/Downloads keeps
+    // com.apple.quarantine, so Gatekeeper runs the app translocated from a read-only
+    // mount and the next in-app update fails. `hidden` keeps them in the full table,
+    // where someone who knows they want the updater artifact can still find them.
+    { id: "mac-arm64-zip", os: "macOS", osLabel: "macOS",   arch: "arm64", archLabel: "Apple Silicon (M-series)", ext: "zip",    format: "Update feed (.zip)", hidden: true },
+    { id: "mac-x64-zip",   os: "macOS", osLabel: "macOS",   arch: "x64",   archLabel: "Intel (x86_64)",           ext: "zip",    format: "Update feed (.zip)", hidden: true },
+
+    { id: "win-x64",     os: "Windows", osLabel: "Windows", arch: "x64",   archLabel: "64-bit (x64)",             ext: "exe",    format: "Installer (.exe)",  primary: true,
+      hint: "One-click, per-user install — no admin prompt." },
+    { id: "win-arm64",   os: "Windows", osLabel: "Windows", arch: "arm64", archLabel: "ARM64",                    ext: "exe",    format: "Installer (.exe)",  primary: true,
+      hint: "One-click, per-user install — no admin prompt." },
+
+    { id: "linux-x64-appimage",   os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "AppImage", format: "Portable (.AppImage)", primary: true,
+      hint: "chmod +x the file and run it — works on any distro." },
+    { id: "linux-x64-deb",        os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "deb",      format: "Debian / Ubuntu (.deb)" },
+    { id: "linux-x64-targz",      os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "tar.gz",   format: "Archive (.tar.gz)" },
+    { id: "linux-arm64-appimage", os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "AppImage", format: "Portable (.AppImage)", primary: true,
+      hint: "chmod +x the file and run it — works on any distro." },
+    { id: "linux-arm64-deb",      os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "deb",      format: "Debian / Ubuntu (.deb)" },
+    { id: "linux-arm64-targz",    os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "tar.gz",   format: "Archive (.tar.gz)" }
+  ];
+
+  BUILDS.forEach(function (b) {
+    b.file = fileFor(b.osLabel, b.arch, b.ext);
+    b.url = urlFor(b.file);
+  });
+
+  function buildsFor(os, arch) {
+    return BUILDS.filter(function (b) { return b.os === os && (!arch || b.arch === arch); });
+  }
+  function primaryFor(os, arch) {
+    return buildsFor(os, arch).filter(function (b) { return b.primary; })[0] || buildsFor(os, arch)[0] || null;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 3. Hardware / platform detection.
+   *    Preference order:
+   *      a) User-Agent Client Hints (Chromium)     — reliable arch + OS version
+   *      b) WebGL renderer string                  — Apple Silicon vs Intel on Safari
+   *      c) User-agent string parsing              — last resort
+   * ------------------------------------------------------------------ */
+
+  function gpuRenderer() {
+    try {
+      var canvas = document.createElement("canvas");
+      var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      if (!gl) return null;
+      var ext = gl.getExtension("WEBGL_debug_renderer_info");
+      var name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      var lose = gl.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+      return name || null;
+    } catch (e) { return null; }
+  }
+
+  function detectFromUAString(ua, platform, maxTouchPoints) {
+    var d = { os: null, osVersion: null, arch: null, mobile: false, confidence: "low" };
+
+    if (/Android/i.test(ua)) {
+      d.os = "Android"; d.mobile = true;
+    } else if (/iPhone|iPod/i.test(ua)) {
+      d.os = "iOS"; d.mobile = true;
+    } else if (/iPad/i.test(ua) || (platform === "MacIntel" && maxTouchPoints > 1)) {
+      // iPadOS masquerades as a Mac; touch points give it away.
+      d.os = "iPadOS"; d.mobile = true;
+    } else if (/CrOS/i.test(ua)) {
+      d.os = "ChromeOS";
+    } else if (/Windows NT/i.test(ua)) {
+      d.os = "Windows";
+      var nt = /Windows NT ([0-9.]+)/i.exec(ua);
+      if (nt) {
+        // NT kernel version -> consumer name. 10.0 covers both Windows 10 and 11;
+        // the UA string cannot tell those two apart, but everything below it is
+        // unambiguously an unsupported release.
+        var NT = { "10.0": ["10 or 11", 10], "6.3": ["8.1", 8], "6.2": ["8", 8],
+                   "6.1": ["7", 7], "6.0": ["Vista", 6], "5.2": ["XP", 5], "5.1": ["XP", 5] };
+        var hit = NT[nt[1]];
+        d.osVersion = hit ? hit[0] : nt[1];
+        d.osMajor = hit ? hit[1] : null;
+      }
+    } else if (/Mac OS X|Macintosh/i.test(ua)) {
+      d.os = "macOS";
+      var mac = /Mac OS X ([0-9_.]+)/i.exec(ua);
+      if (mac) {
+        var v = mac[1].replace(/_/g, ".").split(".");
+        var major = parseInt(v[0], 10);
+        var minor = parseInt(v[1] || "0", 10);
+        if (mac[1].replace(/_/g, ".") === "10.15.7") {
+          // Safari has frozen this at 10.15.7 since Big Sur, so it is a floor and
+          // not a version — an actual Catalina machine is indistinguishable here.
+          d.osPinned = true;
+        } else {
+          d.osVersion = mac[1].replace(/_/g, ".");
+          // 10.x is pre-Big Sur; from 11 on the major number is the release.
+          d.osMajor = major === 10 ? 10 : major;
+          d.osMinor = minor;
+        }
+      }
+    } else if (/Linux|X11/i.test(ua)) {
+      d.os = "Linux";
+    }
+
+    // macOS is deliberately skipped here: Safari reports "Intel Mac OS X 10_15_7" on every Mac,
+    // Apple Silicon included, so the UA string can only mislead. The GPU string decides instead.
+    if (d.os !== "macOS") {
+      if (/arm64|aarch64|ARM64/i.test(ua)) d.arch = "arm64";
+      else if (/Win64|x86_64|x64|WOW64/i.test(ua)) d.arch = "x64";
+      else if (/armv7|armv8l/i.test(ua)) d.arch = "arm";
+      if (d.arch) d.confidence = "medium";
+    }
+
+    return d;
+  }
+
+  function detect() {
+    var nav = navigator;
+    var ua = nav.userAgent || "";
+    var result = detectFromUAString(ua, nav.platform || "", nav.maxTouchPoints || 0);
+    result.gpu = null;
+    result.cores = typeof nav.hardwareConcurrency === "number" ? nav.hardwareConcurrency : null;
+    result.memory = typeof nav.deviceMemory === "number" ? nav.deviceMemory : null;
+    result.source = "user-agent string";
+
+    var uaData = nav.userAgentData;
+    if (!uaData || typeof uaData.getHighEntropyValues !== "function") {
+      // Safari / Firefox path: the GPU string is the only honest Apple-Silicon signal.
+      return finishWithGpu(result);
+    }
+
+    result.mobile = !!uaData.mobile || result.mobile;
+
+    return uaData.getHighEntropyValues(["platform", "platformVersion", "architecture", "bitness", "model"])
+      .then(function (h) {
+        var p = h.platform || uaData.platform || "";
+        if (/mac/i.test(p)) result.os = "macOS";
+        else if (/windows/i.test(p)) result.os = "Windows";
+        else if (/android/i.test(p)) { result.os = "Android"; result.mobile = true; }
+        else if (/chrome ?os|cros/i.test(p)) result.os = "ChromeOS";
+        else if (/linux/i.test(p)) result.os = "Linux";
+
+        if (h.architecture === "arm") {
+          result.arch = h.bitness === "32" ? "arm" : "arm64";
+        } else if (h.architecture === "x86") {
+          result.arch = h.bitness === "32" ? "ia32" : "x64";
+        }
+
+        if (h.platformVersion) {
+          var pvMajor = parseInt(h.platformVersion.split(".")[0], 10);
+          if (result.os === "Windows" && !isNaN(pvMajor)) {
+            // Chromium reports the UniversalApiContract version here, not the NT version:
+            // 0 means Windows 7/8/8.1, 1-12 means Windows 10, 13+ means Windows 11.
+            if (pvMajor === 0) { result.osVersion = "8.1 or older"; result.osMajor = 8; }
+            else if (pvMajor >= 13) { result.osVersion = "11"; result.osMajor = 11; }
+            else { result.osVersion = "10"; result.osMajor = 10; }
+            result.osPinned = false;
+          } else if (!isNaN(pvMajor)) {
+            result.osVersion = h.platformVersion;
+            result.osMajor = pvMajor;
+            result.osMinor = parseInt(h.platformVersion.split(".")[1] || "0", 10);
+            result.osPinned = false;
+          }
+        }
+        if (h.model) result.model = h.model;
+
+        result.source = "Client Hints";
+        result.confidence = result.arch ? "high" : "medium";
+        return finishWithGpu(result);
+      })
+      .catch(function () { return finishWithGpu(result); });
+  }
+
+  function finishWithGpu(result) {
+    result.gpu = gpuRenderer();
+
+    // Apple Silicon Macs report "Apple GPU" (Safari) or "Apple M1/M2/..." (Chromium).
+    if (result.os === "macOS" && !result.arch && result.gpu) {
+      if (/Apple\s*(M\d|GPU)/i.test(result.gpu)) {
+        result.arch = "arm64";
+        result.confidence = "medium";
+        result.archEvidence = "GPU reports " + result.gpu;
+      } else if (/Intel|AMD|Radeon/i.test(result.gpu)) {
+        result.arch = "x64";
+        result.confidence = "medium";
+        result.archEvidence = "GPU reports " + result.gpu;
+      }
+    }
+    // A Mac with no usable signal is far more likely to be Apple Silicon today.
+    if (result.os === "macOS" && !result.arch) {
+      result.arch = "arm64";
+      result.confidence = "low";
+      result.archEvidence = "assumed";
+    }
+    if (result.os === "Windows" && !result.arch) {
+      result.arch = "x64";
+      result.confidence = "low";
+      result.archEvidence = "assumed";
+    }
+    if (result.os === "Linux" && !result.arch) {
+      result.arch = "x64";
+      result.confidence = "low";
+      result.archEvidence = "assumed";
+    }
+    return Promise.resolve(result);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 4. Rendering
+   * ------------------------------------------------------------------ */
+
+  var pickRegion = document.getElementById("pick-region");
+  var specsEl = document.getElementById("specs");
+  var rowsEl = document.getElementById("all-rows");
+  var overrideEl = document.getElementById("os-override");
+  var versionTag = document.getElementById("version-tag");
+
+  versionTag.textContent = "Version " + RELEASE.version;
+  document.getElementById("all-summary").textContent = "All builds for version " + RELEASE.version;
+  document.getElementById("req-line").innerHTML =
+    "<strong>Minimum requirements:</strong> " + REQUIREMENTS.memoryGb + " GB of memory, a 64-bit processor, and " +
+    REQUIREMENTS.os["macOS"].label + ", " + REQUIREMENTS.os["Windows"].label + " or " +
+    REQUIREMENTS.os["Linux"].label + ".";
+
+  function el(tag, className, text) {
+    var n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  var OS_STEPS = {
+    "macOS": [
+      "Open the <strong>.dmg</strong> and drag <strong>Kolga</strong> onto the Applications shortcut. Run it from Applications, not from the mounted image — both a mounted DMG and an unzipped copy are read-only, which blocks later in-app updates.",
+      "Signed and notarized builds open straight away. An un-notarized build needs <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>.",
+      "First run downloads one model into your app-data folder; after that Kolga works offline."
+    ],
+    "Windows": [
+      "Run the <strong>.exe</strong>. It installs per-user with no admin prompt and fetches nothing at install time.",
+      "Unsigned builds show SmartScreen — choose <strong>More info → Run anyway</strong>.",
+      "First run downloads one model into your app-data folder; after that Kolga works offline."
+    ],
+    "Linux": [
+      "<strong>AppImage:</strong> <code>chmod +x</code> the file, then run it. No install needed.",
+      "<strong>.deb:</strong> <code>sudo apt install ./&lt;file&gt;.deb</code> on Debian or Ubuntu.",
+      "First run downloads one model into your app-data folder; after that Kolga works offline."
+    ]
+  };
+
+  /* ------------------------------------------------------------------ *
+   * 3b. Requirement check.
+   *     Three states per requirement, never two: "pass", "fail" (proven
+   *     below the floor) and "unknown" (the browser did not say). Only a
+   *     proven fail blocks the download — an unknown must not lock out the
+   *     many visitors whose browser simply withholds the signal.
+   * ------------------------------------------------------------------ */
+  function checkSystem(info) {
+    var items = [];
+
+    // --- memory ---------------------------------------------------------
+    // navigator.deviceMemory is Chromium-only, rounded down to a power of two
+    // and capped at 8, so 8 reads as "8 GB or more" and anything lower is real.
+    if (info.memory == null) {
+      items.push({ id: "memory", state: "unknown", label: REQUIREMENTS.memoryGb + " GB of memory",
+                   detail: "your browser does not report memory \u2014 please check yourself" });
+    } else if (info.memory >= REQUIREMENTS.memoryGb) {
+      items.push({ id: "memory", state: "pass", label: REQUIREMENTS.memoryGb + " GB of memory",
+                   detail: "reports " + REQUIREMENTS.memoryGb + " GB or more" });
+    } else {
+      items.push({ id: "memory", state: "fail", label: REQUIREMENTS.memoryGb + " GB of memory",
+                   detail: "this machine reports about " + info.memory + " GB" });
+    }
+
+    // --- 64-bit ---------------------------------------------------------
+    if (!info.arch) {
+      items.push({ id: "arch", state: "unknown", label: "64-bit processor",
+                   detail: "architecture not reported" });
+    } else if (REQUIREMENTS.arch[info.arch]) {
+      items.push({ id: "arch", state: "pass", label: "64-bit processor",
+                   detail: info.arch === "arm64" ? "ARM64" : "x86_64" });
+    } else {
+      items.push({ id: "arch", state: "fail", label: "64-bit processor",
+                   detail: "this machine is 32-bit \u2014 Kolga ships 64-bit builds only" });
+    }
+
+    // --- OS version -----------------------------------------------------
+    var osReq = REQUIREMENTS.os[info.os];
+    if (osReq) {
+      if (osReq.minMajor == null) {
+        // Linux: the browser exposes no distro or glibc version at all.
+        items.push({ id: "os", state: "unknown", label: osReq.label,
+                     detail: "not detectable in a browser" });
+      } else if (info.osPinned) {
+        items.push({ id: "os", state: "unknown", label: osReq.label,
+                     detail: "Safari reports 10.15.7 on every Mac, so the real version is hidden" });
+      } else if (info.osMajor == null) {
+        items.push({ id: "os", state: "unknown", label: osReq.label, detail: "version not reported" });
+      } else if (info.osMajor >= osReq.minMajor) {
+        items.push({ id: "os", state: "pass", label: osReq.label,
+                     detail: info.os + " " + (info.osVersion || info.osMajor) });
+      } else {
+        items.push({ id: "os", state: "fail", label: osReq.label,
+                     detail: "this machine runs " + info.os + " " + (info.osVersion || info.osMajor) });
+      }
+    }
+
+    // --- CPU threads ----------------------------------------------------
+    // Advisory only: Firefox's resistFingerprinting reports 2 on every machine,
+    // so a low count is a hint that generation will be slow, never a blocker.
+    if (info.cores != null && info.cores < REQUIREMENTS.cores) {
+      items.push({ id: "cores", state: "warn", advisory: true,
+                   label: REQUIREMENTS.cores + " CPU cores recommended",
+                   detail: "only " + info.cores + " reported \u2014 Kolga will run, but slowly" });
+    }
+
+    var verdict = "pass";
+    items.forEach(function (i) {
+      if (i.state === "fail") verdict = "fail";
+      else if (i.state === "warn" && verdict === "pass") verdict = "warn";
+    });
+    return { items: items, verdict: verdict, failed: items.filter(function (i) { return i.state === "fail"; }) };
+  }
+
+  function renderChecklist(check) {
+    var list = el("ul", "reqs");
+    var GLYPH = { pass: "\u2713", fail: "\u2717", warn: "!", unknown: "?" };
+    check.items.forEach(function (i) {
+      var li = el("li", "req req-" + i.state);
+      li.appendChild(el("span", "req-mark", GLYPH[i.state] || "?"));
+      var body = el("span", "req-body");
+      body.appendChild(el("span", "req-label", i.label));
+      body.appendChild(el("small", null, i.detail));
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+    return list;
+  }
+
+  function showAllBuilds() {
+    var d = document.getElementById("all-builds");
+    d.open = true;
+    d.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderPick(info, build, overridden) {
+    pickRegion.textContent = "";
+
+    var DESKTOP = { "macOS": 1, "Windows": 1, "Linux": 1 };
+    // A 32-bit machine matches no build at all. Fall back to the OS default so the
+    // requirement check below can explain why, instead of the generic "desktop app" note.
+    if (DESKTOP[info.os] && !build) build = primaryFor(info.os, null);
+    if (!build || !DESKTOP[info.os]) {
+      var head = el("p", "pick-title", "Kolga is a desktop app");
+      var sub = el("p", "pick-sub");
+      sub.textContent = info.os
+        ? "You appear to be on " + info.os + ". There is no " + info.os + " build — Kolga runs the model locally on macOS, Windows or Linux."
+        : "We could not work out what you are running. Pick a build from the list below.";
+      pickRegion.appendChild(head);
+      pickRegion.appendChild(sub);
+
+      var open = el("button", "btn secondary", "Show all builds");
+      open.type = "button";
+      open.addEventListener("click", showAllBuilds);
+      pickRegion.appendChild(open);
+      return;
+    }
+
+    var check = checkSystem(info);
+    var blocked = check.verdict === "fail";
+    document.getElementById("card-eyebrow").textContent =
+      blocked ? "System check" : "Recommended for your machine";
+
+    var title = el("p", "pick-title");
+    title.id = "pick-title";
+    title.textContent = blocked
+      ? "This machine is below the minimum requirements"
+      : build.os + " · " + build.archLabel;
+    pickRegion.appendChild(title);
+
+    var sub = el("p", "pick-sub");
+    if (blocked) {
+      var why = check.failed.map(function (i) { return i.detail; }).join(". ");
+      var ids = check.failed.map(function (i) { return i.id; });
+      var tail = ids.indexOf("memory") > -1
+        ? " Kolga runs the language model on your own machine, so it needs that headroom."
+        : ids.indexOf("os") > -1
+          ? " Kolga's runtime does not support that release."
+          : "";
+      sub.textContent = why.charAt(0).toUpperCase() + why.slice(1) + "." + tail;
+    } else {
+      sub.appendChild(document.createTextNode(build.format + " — "));
+      sub.appendChild(el("span", "file mono", build.file));
+    }
+    pickRegion.appendChild(sub);
+
+    // A failed architecture check is the one blocker with no escape hatch: every build
+    // we ship is 64-bit, so there is nothing to offer "anyway".
+    var noBuild = check.failed.some(function (i) { return i.id === "arch"; });
+
+    var row = el("div", "cta-row");
+    if (noBuild) {
+      var browse = el("button", "btn secondary", "Show all builds");
+      browse.type = "button";
+      browse.addEventListener("click", showAllBuilds);
+      row.appendChild(browse);
+    } else {
+      var btn = el("a", blocked ? "btn secondary" : "btn");
+      btn.href = build.url;
+      btn.rel = "noopener";
+      btn.appendChild(document.createTextNode(
+        blocked ? "Download anyway (" + build.arch + ")" : "Download for " + build.os));
+      row.appendChild(btn);
+    }
+
+    // Other formats for the same architecture sit beside the main button; the other
+    // architecture gets one link rather than doubling the row. A blocked machine gets
+    // neither — the one escape hatch above is enough.
+    if (!blocked) buildsFor(build.os, build.arch).forEach(function (b) {
+      if (b.id === build.id || b.hidden) return;
+      var alt = el("a", "btn secondary");
+      alt.href = b.url;
+      alt.rel = "noopener";
+      alt.textContent = b.format;
+      row.appendChild(alt);
+    });
+
+    var otherArch = blocked ? null : buildsFor(build.os, null).filter(function (b) {
+      return b.arch !== build.arch && b.primary;
+    })[0];
+    if (otherArch) {
+      var swap = el("a", "btn secondary");
+      swap.href = otherArch.url;
+      swap.rel = "noopener";
+      swap.textContent = otherArch.archLabel + " instead";
+      row.appendChild(swap);
+    }
+    pickRegion.appendChild(row);
+
+    pickRegion.appendChild(renderChecklist(check));
+
+    if (blocked) {
+      var block = el("div", "notice");
+      block.innerHTML = noBuild
+        ? "<b>There is no build for this machine.</b> Every Kolga build is 64-bit. If your browser " +
+          "reported the wrong architecture, pick a build from the full list."
+        : "<b>Nothing is stopping you.</b> Detection reads what the browser chooses to report and it " +
+          "can be wrong, so the download stays available — but below these floors the model either " +
+          "will not load or will be painfully slow.";
+      pickRegion.appendChild(block);
+    }
+
+    if (!blocked && !overridden && info.confidence === "low") {
+      var warn = el("div", "notice");
+      warn.innerHTML = "<b>Low-confidence guess.</b> Your browser did not report the CPU architecture, so this is the most likely build rather than a confirmed match. If it refuses to start, try the other architecture above.";
+      pickRegion.appendChild(warn);
+    }
+
+    var steps = noBuild ? null : OS_STEPS[build.os];
+    if (steps) {
+      var ol = el("ol", "steps");
+      steps.forEach(function (s) {
+        var li = document.createElement("li");
+        li.innerHTML = s;
+        ol.appendChild(li);
+      });
+      pickRegion.appendChild(ol);
+    }
+
+    // Highlight the matching row in the full table.
+    Array.prototype.forEach.call(rowsEl.children, function (tr) {
+      tr.classList.toggle("is-pick", tr.getAttribute("data-id") === build.id);
+    });
+  }
+
+  // Renderer strings are verbose and wrapped by ANGLE on Windows/Linux, e.g.
+  // "ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 Direct3D11 vs_5_0 ps_5_0, D3D11)".
+  // Keep the recognisable device name and drop the plumbing.
+  function shortenGpu(raw) {
+    var name = String(raw).trim();
+    var angle = /^ANGLE \(([^,]+),\s*([\s\S]+?)(?:,\s*[^,]*\)\s*)?$/.exec(name);
+    if (angle) name = angle[2].trim();
+    name = name.replace(/^ANGLE\s+\w+\s+Renderer:\s*/i, "");
+    name = name.split(/\s+(?:Direct3D|OpenGL|OpenGLES|Vulkan|vs_\d)/i)[0].trim();
+    name = name.replace(/\(R\)|\(TM\)/gi, "");
+    // Drop a dangling "(" fragment left behind by the cuts above.
+    if ((name.match(/\(/g) || []).length > (name.match(/\)/g) || []).length) {
+      name = name.slice(0, name.lastIndexOf("(")).trim();
+    }
+    name = name.replace(/[\s,]+$/, "");
+    if (!name) name = String(raw).trim();
+    return name.length > 44 ? name.slice(0, 43).trim() + "\u2026" : name;
+  }
+
+  function renderSpecs(info) {
+    specsEl.textContent = "";
+
+    function add(label, value, sub, badge, cls) {
+      var wrap = el("div", "spec" + (cls ? " " + cls : ""));
+      wrap.appendChild(el("dt", null, label));
+      var dd = el("dd", null, value);
+      if (badge) {
+        dd.appendChild(document.createTextNode(" "));
+        var b = el("span", "badge" + (badge === "detected" ? "" : " guess"), badge === "detected" ? "detected" : "guessed");
+        dd.appendChild(b);
+      }
+      if (sub) dd.appendChild(el("small", null, sub));
+      wrap.appendChild(dd);
+      specsEl.appendChild(wrap);
+    }
+
+    var osValue = info.os || "Unknown";
+    if (info.osVersion) osValue += " " + info.osVersion;
+    add("Operating system", osValue, "via " + info.source, info.os ? "detected" : "guess");
+
+    var archLabels = { arm64: "ARM64", x64: "x86_64", ia32: "x86 (32-bit)", arm: "ARM (32-bit)" };
+    add(
+      "Architecture",
+      info.arch ? (archLabels[info.arch] || info.arch) : "Unknown",
+      info.archEvidence || (info.source === "Client Hints" ? "via Client Hints" : "via user-agent string"),
+      info.archEvidence === "assumed" ? "guess" : "detected"
+    );
+
+    add("CPU threads", info.cores != null ? String(info.cores) : "Not reported",
+        info.cores != null ? "logical processors" : "browser withholds this");
+
+    var memOk = info.memory != null && info.memory >= REQUIREMENTS.memoryGb;
+    add("Memory",
+        info.memory == null ? "Not reported"
+          : memOk ? info.memory + " GB or more" : "about " + info.memory + " GB",
+        info.memory == null ? "Chromium-only signal"
+          : info.memory === 8 ? "browsers cap this reading at 8 GB"
+          : memOk ? "reported by your browser"
+                  : "rounded down to a power of two");
+
+    if (info.gpu) add("Graphics", shortenGpu(info.gpu), "via WebGL", null, "gpu");
+  }
+
+  function renderAllBuilds() {
+    BUILDS.forEach(function (b) {
+      var tr = document.createElement("tr");
+      tr.setAttribute("data-id", b.id);
+      tr.appendChild(el("td", null, b.os));
+      tr.appendChild(el("td", null, b.archLabel));
+      tr.appendChild(el("td", null, b.format));
+      var td = document.createElement("td");
+      var a = el("a", "mono", b.file);
+      a.href = b.url;
+      a.rel = "noopener";
+      td.appendChild(a);
+      tr.appendChild(td);
+      rowsEl.appendChild(tr);
+    });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 5. Wire-up
+   * ------------------------------------------------------------------ */
+
+  var detected = null;
+
+  var OVERRIDES = {
+    "mac-arm64":   { os: "macOS",   arch: "arm64" },
+    "mac-x64":     { os: "macOS",   arch: "x64" },
+    "win-x64":     { os: "Windows", arch: "x64" },
+    "win-arm64":   { os: "Windows", arch: "arm64" },
+    "linux-x64":   { os: "Linux",   arch: "x64" },
+    "linux-arm64": { os: "Linux",   arch: "arm64" }
+  };
+
+  overrideEl.addEventListener("change", function () {
+    var v = overrideEl.value;
+    if (v === "auto") {
+      if (detected) renderPick(detected, primaryFor(detected.os, detected.arch), false);
+      return;
+    }
+    var o = OVERRIDES[v];
+    // Carry the measured facts across: the visitor corrected the OS guess, not their RAM.
+    var info = {
+      os: o.os, arch: o.arch, confidence: "high", source: "your choice",
+      memory: detected ? detected.memory : null,
+      cores: detected ? detected.cores : null,
+      gpu: detected ? detected.gpu : null,
+      osMajor: null, osVersion: null, osPinned: false
+    };
+    renderPick(info, primaryFor(o.os, o.arch), true);
+  });
+
+  renderAllBuilds();
+
+  detect().then(function (info) {
+    detected = info;
+    renderSpecs(info);
+    renderPick(info, primaryFor(info.os, info.arch), false);
+  }).catch(function () {
+    renderPick({ os: null, confidence: "low", source: "unavailable" }, null, false);
+  });
+})();
+</script>
+</body>
+</html>
