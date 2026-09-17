@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Download Kolga</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20220%20200'%20width='220'%20height='200'%3E%3Crect%20width='220'%20height='200'%20fill='%232e2018'%3E%3C/rect%3E%3Cg%20transform='translate(110,100)%20rotate(-30)%20translate(-75,-40)'%3E%3Cpath%20d='M2,0%20h85%20a9,9%200%200%201%200,18%20h-85%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3Cpath%20d='M110,0%20h15%20a9,9%200%200%201%200,18%20h-15%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b98f7e'%3E%3C/path%3E%3Cpath%20d='M16,31%20h67%20a9,9%200%200%201%200,18%20h-67%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M106,31%20h33%20a9,9%200%200%201%200,18%20h-33%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M30,62%20h53%20a9,9%200%200%201%200,18%20h-53%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b3a08f'%3E%3C/path%3E%3Cpath%20d='M106,62%20h47%20a9,9%200%200%201%200,18%20h-47%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3C/g%3E%3C/svg%3E">
-<meta name="description" content="Kolga detects your operating system and CPU architecture and points you at the right installer.">
+<meta name="description" content="Kolga reads your operating system, CPU, memory and graphics in the browser, shows you what it found, and points you at the matching installer.">
 <style>
   /* ------------------------------------------------------------------
      Kolga's palette, lifted from renderer/index.css so the download page
@@ -177,7 +177,7 @@
 
   /* ---------- detected specs ---------- */
   .specs {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
     background: var(--surface);
     border-top: 1px solid var(--border);
     border-radius: 0 0 var(--radius) var(--radius);
@@ -193,6 +193,21 @@
   .spec dd { margin: 3px 0 0; font-weight: 560; overflow-wrap: anywhere; hyphens: auto; }
   .spec.gpu dd { font-weight: 480; font-size: 13.5px; line-height: 1.4; }
   .spec dd small { display: block; font-weight: 400; color: var(--text-dim); font-size: 12px; margin-top: 2px; }
+  .spec dd.pending { color: var(--text-dim); font-weight: 480; }
+
+  /* ---------- hardware readout ---------- */
+  /* The specs grid is no longer the foot of the download card, so it loses the
+     rounded bottom and the footer below it takes over. */
+  .hw .specs { border-radius: 0; margin-top: 14px; }
+  .hw-foot {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 13px 22px 15px;
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .hw-foot .btn { padding: 8px 13px; font-size: 13.5px; }
+  .hw-note { color: var(--text-dim); font-size: 13px; }
+  .nojs-only { display: none; }
 
   .badge {
     display: inline-block; font-size: 11px; font-weight: 620; letter-spacing: 0.03em;
@@ -257,6 +272,13 @@
   footer { margin-top: 34px; color: var(--text-dim); font-size: 13px; }
   footer p { margin: 6px 0; }
 </style>
+<noscript><style>
+  /* Nothing will ever fill the readout, so stop the spinner and say why. */
+  .spinner { display: none; }
+  .js-only { display: none; }
+  .nojs-only { display: inline; }
+  #copy-specs { display: none; }
+</style></noscript>
 </head>
 <body>
 <div class="wrap">
@@ -297,24 +319,38 @@
         <label for="os-override">Wrong guess?</label>
         <select id="os-override">
           <option value="auto">Detect automatically</option>
-          <option value="mac-arm64">macOS &middot; Apple Silicon</option>
-          <option value="mac-x64">macOS &middot; Intel</option>
-          <option value="win-x64">Windows &middot; 64-bit (x64)</option>
-          <option value="win-arm64">Windows &middot; ARM64</option>
-          <option value="linux-x64">Linux &middot; x86_64</option>
-          <option value="linux-arm64">Linux &middot; ARM64</option>
         </select>
       </div>
     </div>
-    <dl class="specs" id="specs"></dl>
   </section>
 
   <noscript>
     <div class="notice" style="margin-top:22px">
-      JavaScript is off, so nothing can be detected. Kolga needs 8 GB of memory, a 64-bit
-      processor and macOS 11, Windows 10 or glibc 2.28 or newer. Pick your build from the full list below.
+      JavaScript is off, so nothing can be detected and the build list — which is read from the
+      release feed — stays empty. Kolga needs 8 GB of memory, a 64-bit processor and macOS 11,
+      Windows 10 or glibc 2.28 or newer.
+      <a href="https://github.com/MitchWeber/dev-ai-workbench/releases/latest" rel="noopener">Browse the latest release</a>
+      to pick a file by hand.
     </div>
   </noscript>
+
+  <section class="card hw" aria-labelledby="hw-title">
+    <div class="card-head">
+      <span class="eyebrow" id="hw-title">Detected hardware</span>
+      <span class="eyebrow" id="hw-source"></span>
+    </div>
+    <dl class="specs" id="specs">
+      <div class="spec">
+        <dt>Reading your system</dt>
+        <dd class="pending"><span class="spinner" aria-hidden="true"></span>
+          <span class="js-only">One moment&hellip;</span><span class="nojs-only">JavaScript is off, so nothing can be measured.</span></dd>
+      </div>
+    </dl>
+    <div class="hw-foot">
+      <button type="button" class="btn secondary" id="copy-specs">Copy hardware summary</button>
+      <span class="hw-note">Measured in this browser. Nothing is uploaded.</span>
+    </div>
+  </section>
 
   <details class="all" id="all-builds">
     <summary id="all-summary">All builds</summary>
@@ -329,6 +365,7 @@
   </details>
 
   <footer>
+    <p id="feed-note"></p>
     <p id="req-line"></p>
     <p><strong>Detection runs entirely in your browser.</strong> Nothing about your hardware is sent anywhere.</p>
     <p>
@@ -345,18 +382,42 @@
   "use strict";
 
   /* ------------------------------------------------------------------ *
-   * 1. Release config — the only thing you edit when you cut a release.
-   *    File names mirror electron-builder's artifactName patterns:
-   *      macOS   ${name}.macOS.${version}.${arch}.${ext}
-   *      Windows ${name}.Windows.${version}.${arch}.${ext}
-   *      Linux   ${name}.Linux.${version}.${arch}.${ext}
+   * 1. Release config.
+   *    The version is not baked in. electron-builder writes one update feed
+   *    per platform beside the artifacts it uploads, and the release job
+   *    copies those feeds next to this page; whatever they say is what the
+   *    page offers, so cutting a release needs no edit here.
+   *
+   *    The feeds have to be served from this origin. github.com sends no
+   *    Access-Control-Allow-Origin on a release download, so a page cannot
+   *    read a feed straight out of the release — public repo or not.
    * ------------------------------------------------------------------ */
   var RELEASE = {
     appName: "Kolga",
-    artifactName: "kolga",                     // electron-builder ${name}
-    version: "0.8.0",
-    baseUrl: "https://github.com/MitchWeber/dev-ai-workbench/releases/download/v0.8.0/"
+    // Where the artifacts live. {version} is filled in per platform, because
+    // macOS and Windows do not always ship from the same release.
+    downloadBase: "https://github.com/MitchWeber/dev-ai-workbench/releases/download/v{version}/",
+    feedBase: "",                   // same directory as this page
+    feeds: [
+      { file: "latest-mac.yml",         os: "macOS" },
+      { file: "latest.yml",             os: "Windows" },
+      { file: "latest-linux.yml",       os: "Linux" },
+      { file: "latest-linux-arm64.yml", os: "Linux" }
+    ],
+    // A feed that never answers must not hold the download button hostage.
+    feedTimeoutMs: 6000
   };
+
+  /* Used only when no feed answers: a release job that has not copied them
+     yet, a page opened straight off the filesystem, or a visitor offline.
+     These are last known good file names, and the version in each name is
+     the version the page then shows. */
+  var FALLBACK_FILES = [
+    { os: "macOS",   file: "kolga.macOS.0.9.6.arm64.zip" },
+    { os: "macOS",   file: "kolga.macOS.0.9.6.x64.zip" },
+    { os: "Windows", file: "kolga.Windows.0.9.5.x64.exe" },
+    { os: "Windows", file: "kolga.Windows.0.9.5.arm64.exe" }
+  ];
 
   /* ------------------------------------------------------------------ *
    * 1b. Minimum requirements. Kolga runs the model locally, so the floor
@@ -375,55 +436,226 @@
     }
   };
 
-  function fileFor(osLabel, arch, ext) {
-    return [RELEASE.artifactName, osLabel, RELEASE.version, arch, ext].join(".");
-  }
-  function urlFor(file) {
-    return RELEASE.baseUrl + file;
+  /* ------------------------------------------------------------------ *
+   * 2. Reading the update feeds.
+   *    A feed is electron-builder's latest*.yml:
+   *
+   *      version: 0.9.6
+   *      files:
+   *        - url: kolga.macOS.0.9.6.arm64.zip
+   *          sha512: ...
+   *          size: 304535846
+   *      path: kolga.macOS.0.9.6.arm64.zip
+   *      releaseDate: '2026-09-14T16:03:30.647Z'
+   *
+   *    Only version, releaseDate and the url/size of each file are read, so
+   *    a few lines of parsing beat pulling in a YAML library. Keys land in a
+   *    fixed set of fields rather than on a free-form object, so nothing in
+   *    the file can reach anything it should not.
+   * ------------------------------------------------------------------ */
+  function parseFeed(text) {
+    var feed = { version: null, releaseDate: null, files: [] };
+    var lines = String(text).split(/\r?\n/);
+    var inFiles = false, current = null;
+
+    function clean(v) {
+      return String(v).trim().replace(/^['"]|['"]$/g, "");
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (!line.trim() || /^\s*#/.test(line)) continue;
+
+      var top = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line);
+      if (top) {
+        inFiles = top[1] === "files";
+        current = null;
+        if (top[1] === "version") feed.version = clean(top[2]);
+        else if (top[1] === "releaseDate") feed.releaseDate = clean(top[2]);
+        continue;
+      }
+      if (!inFiles) continue;
+
+      var item = /^\s*-\s*(\w+):\s*(.*)$/.exec(line);
+      if (item) {
+        current = { url: null, size: null };
+        feed.files.push(current);
+      } else {
+        var prop = /^\s+(\w+):\s*(.*)$/.exec(line);
+        if (!prop || !current) continue;
+        item = prop;
+      }
+      if (item[1] === "url") current.url = clean(item[2]);
+      else if (item[1] === "size") current.size = parseInt(clean(item[2]), 10) || null;
+    }
+
+    return feed.files.length ? feed : null;
   }
 
   /* ------------------------------------------------------------------ *
-   * 2. The build matrix (RELEASE.md "Supported matrix").
-   *    `primary: true` marks the default download for that OS + arch.
+   * 2b. Turning a file name into a build.
+   *     The names follow electron-builder's artifactName:
+   *     ${name}.${os}.${version}.${arch}.${ext} — with the arch slot empty
+   *     on the one Windows installer that carries both architectures.
    * ------------------------------------------------------------------ */
-  var BUILDS = [
-    { id: "mac-arm64",   os: "macOS",   osLabel: "macOS",   arch: "arm64", archLabel: "Apple Silicon (M-series)", ext: "dmg",    format: "Disk image (.dmg)", primary: true,
-      hint: "Open it and drag Kolga onto the Applications shortcut." },
-    { id: "mac-x64",     os: "macOS",   osLabel: "macOS",   arch: "x64",   archLabel: "Intel (x86_64)",           ext: "dmg",    format: "Disk image (.dmg)", primary: true,
-      hint: "Open it and drag Kolga onto the Applications shortcut." },
-    // The zips exist for electron-updater, which cannot install from a DMG. They are
-    // deliberately NOT offered as an alternate: a zip unpacked into ~/Downloads keeps
-    // com.apple.quarantine, so Gatekeeper runs the app translocated from a read-only
-    // mount and the next in-app update fails. `hidden` keeps them in the full table,
-    // where someone who knows they want the updater artifact can still find them.
-    { id: "mac-arm64-zip", os: "macOS", osLabel: "macOS",   arch: "arm64", archLabel: "Apple Silicon (M-series)", ext: "zip",    format: "Update feed (.zip)", hidden: true },
-    { id: "mac-x64-zip",   os: "macOS", osLabel: "macOS",   arch: "x64",   archLabel: "Intel (x86_64)",           ext: "zip",    format: "Update feed (.zip)", hidden: true },
+  var ARCH_ALIASES = {
+    x64: "x64", x86_64: "x64", amd64: "x64",
+    arm64: "arm64", aarch64: "arm64",
+    armv7l: "arm", ia32: "ia32", x86: "ia32", universal: "universal"
+  };
+  var ARCH_LABELS = {
+    "macOS":   { arm64: "Apple Silicon (M-series)", x64: "Intel (x86_64)" },
+    "Windows": { arm64: "ARM64", x64: "64-bit (x64)", ia32: "32-bit (x86)" },
+    "Linux":   { arm64: "ARM64", x64: "x86_64", arm: "ARM (32-bit)" }
+  };
+  var EXT_FORMATS = {
+    dmg: "Disk image (.dmg)", zip: "Archive (.zip)", exe: "Installer (.exe)",
+    AppImage: "Portable (.AppImage)", deb: "Debian / Ubuntu (.deb)",
+    rpm: "Red Hat / Fedora (.rpm)", snap: "Snap (.snap)", "tar.gz": "Archive (.tar.gz)"
+  };
+  // Which format to hand someone who has expressed no preference.
+  var EXT_RANK = {
+    "macOS":   { dmg: 0, zip: 1 },
+    "Windows": { exe: 0, zip: 1 },
+    "Linux":   { AppImage: 0, deb: 1, rpm: 2, "tar.gz": 3, snap: 4 }
+  };
+  var ARTIFACT_HINTS = {
+    "macOS.dmg": "Open it and drag Kolga onto the Applications shortcut.",
+    "macOS.zip": "Unzip it and move Kolga into Applications before the first launch.",
+    "Windows.exe": "One-click, per-user install — no admin prompt.",
+    "Linux.AppImage": "chmod +x the file and run it — works on any distro."
+  };
+  var EXT_RE = /\.(tar\.gz|AppImage|dmg|zip|exe|deb|rpm|snap)$/i;
+  var TRAILING_ARCH_RE = /\.(x86_64|amd64|aarch64|arm64|armv7l|x64|ia32|x86|universal)$/i;
 
-    { id: "win-x64",     os: "Windows", osLabel: "Windows", arch: "x64",   archLabel: "64-bit (x64)",             ext: "exe",    format: "Installer (.exe)",  primary: true,
-      hint: "One-click, per-user install — no admin prompt." },
-    { id: "win-arm64",   os: "Windows", osLabel: "Windows", arch: "arm64", archLabel: "ARM64",                    ext: "exe",    format: "Installer (.exe)",  primary: true,
-      hint: "One-click, per-user install — no admin prompt." },
+  function describeArtifact(os, rawName, feedVersion, size) {
+    // electron-builder writes "kolga.Windows.0.9.5..exe" into the feed when the
+    // arch slot is empty, while the uploaded asset has the single dot. Collapse
+    // the run so the link points at the file that actually exists.
+    var file = String(rawName).replace(/\.{2,}/g, ".");
+    var ext = EXT_RE.exec(file);
+    if (!ext) return null;
+    ext = ext[1];
 
-    { id: "linux-x64-appimage",   os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "AppImage", format: "Portable (.AppImage)", primary: true,
-      hint: "chmod +x the file and run it — works on any distro." },
-    { id: "linux-x64-deb",        os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "deb",      format: "Debian / Ubuntu (.deb)" },
-    { id: "linux-x64-targz",      os: "Linux", osLabel: "Linux", arch: "x64",   archLabel: "x86_64", ext: "tar.gz",   format: "Archive (.tar.gz)" },
-    { id: "linux-arm64-appimage", os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "AppImage", format: "Portable (.AppImage)", primary: true,
-      hint: "chmod +x the file and run it — works on any distro." },
-    { id: "linux-arm64-deb",      os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "deb",      format: "Debian / Ubuntu (.deb)" },
-    { id: "linux-arm64-targz",    os: "Linux", osLabel: "Linux", arch: "arm64", archLabel: "ARM64",  ext: "tar.gz",   format: "Archive (.tar.gz)" }
-  ];
+    var stem = file.slice(0, file.length - ext.length - 1);
+    var arch = null;
+    var hit = TRAILING_ARCH_RE.exec(stem);
+    if (hit) {
+      arch = ARCH_ALIASES[hit[1].toLowerCase()] || null;
+      stem = stem.slice(0, hit.index);
+    }
+    // No arch in the name means one artifact for every architecture.
+    if (!arch) arch = "universal";
 
-  BUILDS.forEach(function (b) {
-    b.file = fileFor(b.osLabel, b.arch, b.ext);
-    b.url = urlFor(b.file);
-  });
+    var version = (/(\d+\.\d+\.\d+(?:[-+][\w.]+)?)$/.exec(stem) || [])[1] || feedVersion || null;
+    var labels = ARCH_LABELS[os] || {};
+    var rank = (EXT_RANK[os] || {})[ext];
+
+    return {
+      id: os + "-" + arch + "-" + ext,
+      os: os,
+      arch: arch,
+      archLabel: labels[arch] || (arch === "universal" ? "Universal (any 64-bit)" : arch),
+      ext: ext,
+      format: EXT_FORMATS[ext] || ext,
+      hint: ARTIFACT_HINTS[os + "." + ext] || null,
+      version: version,
+      size: typeof size === "number" ? size : null,
+      file: file,
+      url: RELEASE.downloadBase.replace("{version}", version || "") + file,
+      rank: typeof rank === "number" ? rank : 9
+    };
+  }
+
+  /* The list the whole page renders from. Empty until a feed answers or the
+     fallback takes over, which is why nothing renders before then. */
+  var BUILDS = [];
 
   function buildsFor(os, arch) {
-    return BUILDS.filter(function (b) { return b.os === os && (!arch || b.arch === arch); });
+    return BUILDS.filter(function (b) {
+      return b.os === os && (!arch || b.arch === arch || b.arch === "universal");
+    }).sort(function (a, b) {
+      // An exact architecture match beats the catch-all installer; within a
+      // match, the format ranking decides.
+      var ea = a.arch === arch ? 0 : 1, eb = b.arch === arch ? 0 : 1;
+      return ea - eb || a.rank - b.rank;
+    });
   }
   function primaryFor(os, arch) {
-    return buildsFor(os, arch).filter(function (b) { return b.primary; })[0] || buildsFor(os, arch)[0] || null;
+    return buildsFor(os, arch)[0] || null;
+  }
+  function archesFor(os) {
+    var seen = {}, out = [];
+    BUILDS.forEach(function (b) {
+      if (b.os !== os || seen[b.arch]) return;
+      seen[b.arch] = 1;
+      out.push(b.arch);
+    });
+    return out;
+  }
+  function versionFor(os) {
+    var b = BUILDS.filter(function (x) { return x.os === os; })[0];
+    return b ? b.version : null;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * 2c. Loading the feeds.
+   *     Every feed is asked for at once; each may be missing (a platform
+   *     with no build in the latest release simply has no feed) and a
+   *     missing one is not an error. Whatever comes back becomes BUILDS;
+   *     if nothing does, the baked-in list stands in.
+   * ------------------------------------------------------------------ */
+  function fetchText(url) {
+    if (typeof fetch !== "function") return Promise.reject(new Error("no fetch"));
+    var ctrl = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, RELEASE.feedTimeoutMs);
+    return fetch(url, { cache: "no-cache", signal: ctrl ? ctrl.signal : undefined })
+      .then(function (res) {
+        if (!res.ok) throw new Error(url + " -> " + res.status);
+        return res.text();
+      })
+      .then(function (text) { clearTimeout(timer); return text; },
+            function (err) { clearTimeout(timer); throw err; });
+  }
+
+  var FEED_DATES = {};
+
+  function loadBuilds() {
+    var found = [];
+    var newest = null;
+
+    var jobs = RELEASE.feeds.map(function (f) {
+      return fetchText(RELEASE.feedBase + f.file).then(function (text) {
+        var feed = parseFeed(text);
+        if (!feed) return;
+        feed.files.forEach(function (entry) {
+          if (!entry.url) return;
+          var build = describeArtifact(f.os, entry.url, feed.version, entry.size);
+          if (build) found.push(build);
+        });
+        if (feed.releaseDate) {
+          if (!newest || feed.releaseDate > newest) newest = feed.releaseDate;
+          if (!FEED_DATES[f.os] || feed.releaseDate > FEED_DATES[f.os]) FEED_DATES[f.os] = feed.releaseDate;
+        }
+      }).catch(function () { /* a platform with no build has no feed */ });
+    });
+
+    return Promise.all(jobs).then(function () {
+      if (found.length) {
+        // Two feeds can name the same artifact; the first one wins.
+        var seen = {};
+        BUILDS = found.filter(function (b) {
+          if (seen[b.id]) return false;
+          seen[b.id] = 1;
+          return true;
+        });
+        return { source: "feed", releaseDate: newest };
+      }
+      BUILDS = FALLBACK_FILES.map(function (f) {
+        return describeArtifact(f.os, f.file, null, null);
+      }).filter(Boolean);
+      return { source: "fallback", releaseDate: null };
+    });
   }
 
   /* ------------------------------------------------------------------ *
@@ -434,17 +666,79 @@
    *      c) User-agent string parsing              — last resort
    * ------------------------------------------------------------------ */
 
-  function gpuRenderer() {
+  function gpuStrings() {
     try {
       var canvas = document.createElement("canvas");
       var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      if (!gl) return null;
+      if (!gl) return { renderer: null, vendor: null };
+      // WEBGL_debug_renderer_info is what names the actual card; without it the
+      // masked strings are a generic "WebKit WebGL", which says nothing.
       var ext = gl.getExtension("WEBGL_debug_renderer_info");
-      var name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      var renderer = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      var vendor = ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
       var lose = gl.getExtension("WEBGL_lose_context");
       if (lose) lose.loseContext();
-      return name || null;
-    } catch (e) { return null; }
+      return { renderer: renderer || null, vendor: vendor || null };
+    } catch (e) { return { renderer: null, vendor: null }; }
+  }
+
+  /* Screen, scaling and colour, all synchronous and available everywhere.
+     The logical width the browser reports is multiplied by devicePixelRatio to
+     get the panel's real pixels, which is the number people recognise. */
+  function readDisplay(result) {
+    var s = window.screen || {};
+    result.dpr = window.devicePixelRatio || 1;
+    result.screenW = typeof s.width === "number" ? s.width : null;
+    result.screenH = typeof s.height === "number" ? s.height : null;
+    result.colorDepth = typeof s.colorDepth === "number" ? s.colorDepth : null;
+    result.touchPoints = typeof navigator.maxTouchPoints === "number" ? navigator.maxTouchPoints : 0;
+    if (window.matchMedia) {
+      ["rec2020", "p3", "srgb"].some(function (g) {
+        try {
+          if (window.matchMedia("(color-gamut: " + g + ")").matches) { result.gamut = g; return true; }
+        } catch (e) {}
+        return false;
+      });
+      try { result.hdr = window.matchMedia("(dynamic-range: high)").matches; } catch (e) {}
+    }
+    return result;
+  }
+
+  /* Rough disk headroom. The quota is what this origin may use, not the free
+     space on the volume, but browsers derive it from that free space, so it is
+     the closest a page gets to "will a few GB of weights fit". */
+  function probeStorage(result) {
+    if (!navigator.storage || typeof navigator.storage.estimate !== "function") return Promise.resolve();
+    return navigator.storage.estimate().then(function (est) {
+      if (est && typeof est.quota === "number") result.storageQuota = est.quota;
+    }).catch(function () {});
+  }
+
+  /* WebGPU names the adapter far more precisely than the WebGL renderer string
+     does, and its presence is itself the signal that matters for a local model. */
+  function probeWebGpu(result) {
+    if (!navigator.gpu || typeof navigator.gpu.requestAdapter !== "function") return Promise.resolve();
+    function take(info) {
+      if (!info) return;
+      var parts = [info.vendor, info.architecture].filter(Boolean).join(" \u00b7 ");
+      result.gpuAdapter = parts || info.description || info.device || null;
+    }
+    return navigator.gpu.requestAdapter().then(function (adapter) {
+      if (!adapter) return;
+      result.webgpu = true;
+      if (adapter.info) return take(adapter.info);
+      // Pre-128 Chromium kept the same fields behind an async call.
+      if (typeof adapter.requestAdapterInfo === "function") {
+        return adapter.requestAdapterInfo().then(take);
+      }
+    }).catch(function () {});
+  }
+
+  function probeConnection(result) {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return;
+    if (typeof c.downlink === "number" && c.downlink > 0) result.downlink = c.downlink;
+    if (c.effectiveType) result.effectiveType = c.effectiveType;
   }
 
   function detectFromUAString(ua, platform, maxTouchPoints) {
@@ -547,6 +841,13 @@
             else if (pvMajor >= 13) { result.osVersion = "11"; result.osMajor = 11; }
             else { result.osVersion = "10"; result.osMajor = 10; }
             result.osPinned = false;
+          } else if (result.os === "macOS" && /^10[._]15[._]7$/.test(h.platformVersion)) {
+            // Chrome froze the macOS platform version at 10.15.7 up to v106, the
+            // same lie Safari still tells. Reading it as Catalina would fail a
+            // machine that is almost certainly fine.
+            result.osPinned = true;
+            result.osVersion = null;
+            result.osMajor = null;
           } else if (!isNaN(pvMajor)) {
             result.osVersion = h.platformVersion;
             result.osMajor = pvMajor;
@@ -564,7 +865,11 @@
   }
 
   function finishWithGpu(result) {
-    result.gpu = gpuRenderer();
+    var g = gpuStrings();
+    result.gpu = g.renderer;
+    result.gpuVendor = g.vendor;
+    readDisplay(result);
+    probeConnection(result);
 
     // Apple Silicon Macs report "Apple GPU" (Safari) or "Apple M1/M2/..." (Chromium).
     if (result.os === "macOS" && !result.arch && result.gpu) {
@@ -607,8 +912,6 @@
   var overrideEl = document.getElementById("os-override");
   var versionTag = document.getElementById("version-tag");
 
-  versionTag.textContent = "Version " + RELEASE.version;
-  document.getElementById("all-summary").textContent = "All builds for version " + RELEASE.version;
   document.getElementById("req-line").innerHTML =
     "<strong>Minimum requirements:</strong> " + REQUIREMENTS.memoryGb + " GB of memory, a 64-bit processor, and " +
     REQUIREMENTS.os["macOS"].label + ", " + REQUIREMENTS.os["Windows"].label + " or " +
@@ -621,23 +924,39 @@
     return n;
   }
 
-  var OS_STEPS = {
-    "macOS": [
-      "Open the <strong>.dmg</strong> and drag <strong>Kolga</strong> onto the Applications shortcut. Run it from Applications, not from the mounted image — both a mounted DMG and an unzipped copy are read-only, which blocks later in-app updates.",
-      "Signed and notarized builds open straight away. An un-notarized build needs <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>.",
-      "First run downloads one model into your app-data folder; after that Kolga works offline."
+  var MODEL_STEP = "First run downloads one model into your app-data folder; after that Kolga works offline.";
+
+  /* Keyed by OS and format: what you do with a .dmg is not what you do with a
+     .zip, and the zip is what macOS ships today. */
+  var INSTALL_STEPS = {
+    "macOS.dmg": [
+      "Open the <strong>.dmg</strong> and drag <strong>Kolga</strong> onto the Applications shortcut. Run it from Applications, not from the mounted image — a mounted DMG is read-only, which blocks later in-app updates.",
+      "Signed and notarized builds open straight away. An un-notarized build needs <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>."
     ],
-    "Windows": [
+    "macOS.zip": [
+      "Unzip it and move <strong>Kolga</strong> into <strong>Applications</strong> <em>before</em> the first launch. Launched from Downloads it stays quarantined, and macOS then runs it from a read-only mount where in-app updates fail.",
+      "Signed and notarized builds open straight away. An un-notarized build needs <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>."
+    ],
+    "Windows.exe": [
       "Run the <strong>.exe</strong>. It installs per-user with no admin prompt and fetches nothing at install time.",
-      "Unsigned builds show SmartScreen — choose <strong>More info → Run anyway</strong>.",
-      "First run downloads one model into your app-data folder; after that Kolga works offline."
+      "Unsigned builds show SmartScreen — choose <strong>More info → Run anyway</strong>."
     ],
-    "Linux": [
-      "<strong>AppImage:</strong> <code>chmod +x</code> the file, then run it. No install needed.",
-      "<strong>.deb:</strong> <code>sudo apt install ./&lt;file&gt;.deb</code> on Debian or Ubuntu.",
-      "First run downloads one model into your app-data folder; after that Kolga works offline."
+    "Linux.AppImage": [
+      "<code>chmod +x</code> the file, then run it. No install needed, and it works on any distro."
+    ],
+    "Linux.deb": [
+      "<code>sudo apt install ./&lt;file&gt;.deb</code> on Debian or Ubuntu."
+    ],
+    "Linux.tar.gz": [
+      "Unpack it anywhere and run the <code>kolga</code> binary inside."
     ]
   };
+
+  function stepsFor(build) {
+    var steps = INSTALL_STEPS[build.os + "." + build.ext];
+    return steps ? steps.concat([MODEL_STEP]) : [MODEL_STEP];
+  }
+
 
   /* ------------------------------------------------------------------ *
    * 3b. Requirement check.
@@ -742,11 +1061,15 @@
     // requirement check below can explain why, instead of the generic "desktop app" note.
     if (DESKTOP[info.os] && !build) build = primaryFor(info.os, null);
     if (!build || !DESKTOP[info.os]) {
-      var head = el("p", "pick-title", "Kolga is a desktop app");
+      var desktopNoBuild = DESKTOP[info.os] && !buildsFor(info.os, null).length;
+      var head = el("p", "pick-title",
+        desktopNoBuild ? "No " + info.os + " build in this release" : "Kolga is a desktop app");
       var sub = el("p", "pick-sub");
-      sub.textContent = info.os
-        ? "You appear to be on " + info.os + ". There is no " + info.os + " build — Kolga runs the model locally on macOS, Windows or Linux."
-        : "We could not work out what you are running. Pick a build from the list below.";
+      sub.textContent = desktopNoBuild
+        ? "The current release ships no " + info.os + " artifact. Everything that was published is listed below."
+        : info.os
+          ? "You appear to be on " + info.os + ". There is no " + info.os + " build — Kolga runs the model locally on macOS, Windows or Linux."
+          : "We could not work out what you are running. Pick a build from the list below.";
       pickRegion.appendChild(head);
       pickRegion.appendChild(sub);
 
@@ -761,6 +1084,8 @@
     var blocked = check.verdict === "fail";
     document.getElementById("card-eyebrow").textContent =
       blocked ? "System check" : "Recommended for your machine";
+
+    versionTag.textContent = build.version ? "Version " + build.version : "";
 
     var title = el("p", "pick-title");
     title.id = "pick-title";
@@ -801,6 +1126,8 @@
       btn.rel = "noopener";
       btn.appendChild(document.createTextNode(
         blocked ? "Download anyway (" + build.arch + ")" : "Download for " + build.os));
+      var size = formatBytes(build.size);
+      if (size) btn.appendChild(el("span", "sz", size));
       row.appendChild(btn);
     }
 
@@ -808,22 +1135,32 @@
     // architecture gets one link rather than doubling the row. A blocked machine gets
     // neither — the one escape hatch above is enough.
     if (!blocked) buildsFor(build.os, build.arch).forEach(function (b) {
-      if (b.id === build.id || b.hidden) return;
+      if (b.id === build.id) return;
       var alt = el("a", "btn secondary");
       alt.href = b.url;
       alt.rel = "noopener";
-      alt.textContent = b.format;
+      alt.appendChild(document.createTextNode(
+        b.arch === "universal" && build.arch !== "universal" ? "Universal " + b.format.toLowerCase() : b.format));
+      var altSize = formatBytes(b.size);
+      if (altSize) alt.appendChild(el("span", "sz", altSize));
       row.appendChild(alt);
     });
 
-    var otherArch = blocked ? null : buildsFor(build.os, null).filter(function (b) {
-      return b.arch !== build.arch && b.primary;
-    })[0];
+    var otherArch = null;
+    if (!blocked) {
+      archesFor(build.os).some(function (a) {
+        if (a === build.arch || a === "universal") return false;
+        otherArch = primaryFor(build.os, a);
+        return !!otherArch;
+      });
+    }
     if (otherArch) {
       var swap = el("a", "btn secondary");
       swap.href = otherArch.url;
       swap.rel = "noopener";
-      swap.textContent = otherArch.archLabel + " instead";
+      swap.appendChild(document.createTextNode(otherArch.archLabel + " instead"));
+      var swapSize = formatBytes(otherArch.size);
+      if (swapSize) swap.appendChild(el("span", "sz", swapSize));
       row.appendChild(swap);
     }
     pickRegion.appendChild(row);
@@ -847,7 +1184,7 @@
       pickRegion.appendChild(warn);
     }
 
-    var steps = noBuild ? null : OS_STEPS[build.os];
+    var steps = noBuild ? null : stepsFor(build);
     if (steps) {
       var ol = el("ol", "steps");
       steps.forEach(function (s) {
@@ -883,51 +1220,157 @@
     return name.length > 44 ? name.slice(0, 43).trim() + "\u2026" : name;
   }
 
-  function renderSpecs(info) {
-    specsEl.textContent = "";
+  function formatBytes(n) {
+    if (typeof n !== "number" || !isFinite(n) || n <= 0) return null;
+    var gb = n / 1073741824;
+    if (gb >= 10) return Math.round(gb) + " GB";
+    if (gb >= 1) return (Math.round(gb * 10) / 10) + " GB";
+    return Math.max(1, Math.round(n / 1048576)) + " MB";
+  }
 
-    function add(label, value, sub, badge, cls) {
-      var wrap = el("div", "spec" + (cls ? " " + cls : ""));
-      wrap.appendChild(el("dt", null, label));
-      var dd = el("dd", null, value);
-      if (badge) {
-        dd.appendChild(document.createTextNode(" "));
-        var b = el("span", "badge" + (badge === "detected" ? "" : " guess"), badge === "detected" ? "detected" : "guessed");
-        dd.appendChild(b);
-      }
-      if (sub) dd.appendChild(el("small", null, sub));
-      wrap.appendChild(dd);
-      specsEl.appendChild(wrap);
-    }
+  /* One row per detected fact. Each returns a value plus the evidence behind it,
+     because a reading the browser guessed and one it measured must not look alike. */
+  function specRows(info) {
+    var chosen = info.source === "your choice";
+    var rows = [];
 
     var osValue = info.os || "Unknown";
     if (info.osVersion) osValue += " " + info.osVersion;
-    add("Operating system", osValue, "via " + info.source, info.os ? "detected" : "guess");
+    rows.push({ label: "Operating system", value: osValue, sub: "via " + info.source,
+                badge: chosen ? null : (info.os ? "detected" : "guess") });
 
     var archLabels = { arm64: "ARM64", x64: "x86_64", ia32: "x86 (32-bit)", arm: "ARM (32-bit)" };
-    add(
-      "Architecture",
-      info.arch ? (archLabels[info.arch] || info.arch) : "Unknown",
-      info.archEvidence || (info.source === "Client Hints" ? "via Client Hints" : "via user-agent string"),
-      info.archEvidence === "assumed" ? "guess" : "detected"
-    );
+    rows.push({
+      label: "Architecture",
+      value: info.arch ? (archLabels[info.arch] || info.arch) : "Unknown",
+      sub: chosen ? "via your choice"
+        : info.archEvidence || (info.source === "Client Hints" ? "via Client Hints" : "via user-agent string"),
+      badge: chosen ? null : (info.archEvidence === "assumed" || !info.arch ? "guess" : "detected")
+    });
 
-    add("CPU threads", info.cores != null ? String(info.cores) : "Not reported",
-        info.cores != null ? "logical processors" : "browser withholds this");
+    if (info.model) rows.push({ label: "Device", value: info.model, sub: "model reported by the browser" });
+
+    rows.push({ label: "CPU threads", value: info.cores != null ? String(info.cores) : "Not reported",
+                sub: info.cores != null ? "logical processors" : "browser withholds this" });
 
     var memOk = info.memory != null && info.memory >= REQUIREMENTS.memoryGb;
-    add("Memory",
-        info.memory == null ? "Not reported"
-          : memOk ? info.memory + " GB or more" : "about " + info.memory + " GB",
-        info.memory == null ? "Chromium-only signal"
-          : info.memory === 8 ? "browsers cap this reading at 8 GB"
-          : memOk ? "reported by your browser"
-                  : "rounded down to a power of two");
+    rows.push({
+      label: "Memory",
+      value: info.memory == null ? "Not reported"
+        : memOk ? info.memory + " GB or more" : "about " + info.memory + " GB",
+      sub: info.memory == null ? "Chromium-only signal"
+        : info.memory === 8 ? "browsers cap this reading at 8 GB"
+        : memOk ? "reported by your browser"
+                : "rounded down to a power of two"
+    });
 
-    if (info.gpu) add("Graphics", shortenGpu(info.gpu), "via WebGL", null, "gpu");
+    if (info.gpu) {
+      rows.push({ label: "Graphics", value: shortenGpu(info.gpu),
+                  sub: info.gpuVendor ? shortenGpu(info.gpuVendor) + " · via WebGL" : "via WebGL",
+                  cls: "gpu" });
+    } else {
+      rows.push({ label: "Graphics", value: "Not reported", sub: "WebGL is unavailable or masked", cls: "gpu" });
+    }
+
+    // Only worth a row where WebGPU exists at all; elsewhere its absence is the
+    // browser's doing, not the machine's, and saying so would mislead.
+    if (navigator.gpu) {
+      rows.push({
+        label: "GPU compute",
+        value: info.webgpu === false ? "No WebGPU adapter" : "WebGPU available",
+        sub: info.webgpu === false ? "the browser offers WebGPU but found no usable adapter"
+          : info.gpuAdapter || (info.webgpu == null ? "asking the adapter…" : "adapter details withheld"),
+        pending: info.webgpu == null
+      });
+    }
+
+    if (info.screenW && info.screenH) {
+      var dpr = info.dpr || 1;
+      var real = Math.round(info.screenW * dpr) + " × " + Math.round(info.screenH * dpr);
+      var bits = [];
+      if (dpr && dpr !== 1) bits.push((Math.round(dpr * 100) / 100) + "× scaling");
+      if (info.colorDepth) bits.push(info.colorDepth + "-bit colour");
+      if (info.gamut && info.gamut !== "srgb") bits.push(info.gamut === "p3" ? "P3" : "Rec. 2020");
+      if (info.hdr) bits.push("HDR");
+      rows.push({ label: "Display", value: real + " px", sub: bits.join(" · ") || "primary screen" });
+    }
+
+    if (info.touchPoints) {
+      rows.push({ label: "Touch", value: info.touchPoints + (info.touchPoints === 1 ? " point" : " points"),
+                  sub: "touchscreen or trackpad gestures" });
+    }
+
+    if (navigator.storage && typeof navigator.storage.estimate === "function") {
+      var quota = formatBytes(info.storageQuota);
+      rows.push({ label: "Free storage", value: quota || "Checking…",
+                  sub: quota ? "browser-visible headroom, not the whole disk" : "asking the browser…",
+                  pending: !quota });
+    }
+
+    if (info.downlink || info.effectiveType) {
+      rows.push({ label: "Connection",
+                  value: info.downlink ? info.downlink + " Mbps" : String(info.effectiveType).toUpperCase(),
+                  sub: info.downlink ? "estimated download speed" : "effective connection type" });
+    }
+
+    return rows;
+  }
+
+  function renderSpecs(info) {
+    specsEl.textContent = "";
+
+    var head = document.getElementById("hw-source");
+    if (head) {
+      head.textContent = info.source === "your choice"
+        ? "Your choice of platform"
+        : "via " + info.source + " · " + (info.confidence || "low") + " confidence";
+    }
+
+    specRows(info).forEach(function (r) {
+      var wrap = el("div", "spec" + (r.cls ? " " + r.cls : ""));
+      wrap.appendChild(el("dt", null, r.label));
+      var dd = el("dd", r.pending ? "pending" : null, r.value);
+      if (r.badge) {
+        dd.appendChild(document.createTextNode(" "));
+        dd.appendChild(el("span", "badge" + (r.badge === "detected" ? "" : " guess"),
+                          r.badge === "detected" ? "detected" : "guessed"));
+      }
+      if (r.sub) dd.appendChild(el("small", null, r.sub));
+      wrap.appendChild(dd);
+      specsEl.appendChild(wrap);
+    });
+  }
+
+  function specsAsText(info) {
+    var version = versionFor(info.os);
+    var lines = [RELEASE.appName + (version ? " " + version : "") + " — detected hardware"];
+    specRows(info).forEach(function (r) {
+      lines.push(r.label + ": " + r.value + (r.sub ? " (" + r.sub + ")" : ""));
+    });
+    return lines.join("\n");
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
   }
 
   function renderAllBuilds() {
+    rowsEl.textContent = "";
     BUILDS.forEach(function (b) {
       var tr = document.createElement("tr");
       tr.setAttribute("data-id", b.id);
@@ -939,9 +1382,56 @@
       a.href = b.url;
       a.rel = "noopener";
       td.appendChild(a);
+      var size = formatBytes(b.size);
+      if (size) td.appendChild(el("small", null, size));
       tr.appendChild(td);
       rowsEl.appendChild(tr);
     });
+  }
+
+  /* The override list is built from what the feeds actually offer, so it can
+     never point at a platform or an architecture with nothing behind it. */
+  function renderOverrides() {
+    var auto = overrideEl.querySelector('option[value="auto"]');
+    overrideEl.textContent = "";
+    if (auto) overrideEl.appendChild(auto);
+    OVERRIDE_ORDER.forEach(function (os) {
+      archesFor(os).forEach(function (arch) {
+        if (arch === "universal") return;
+        var opt = document.createElement("option");
+        opt.value = os + ":" + arch;
+        opt.textContent = os + " \u00b7 " + ((ARCH_LABELS[os] || {})[arch] || arch);
+        overrideEl.appendChild(opt);
+      });
+    });
+  }
+
+  /* Where the build list came from, said plainly under the card. */
+  function renderFeedNote(load, os) {
+    var note = document.getElementById("feed-note");
+    if (!note) return;
+    if (!BUILDS.length) {
+      note.textContent = "No release feed could be read and no build list is available.";
+      return;
+    }
+    if (load.source !== "feed") {
+      note.textContent = "The release feed could not be read, so this is the build list baked into the page \u2014 "
+        + "a newer release may exist.";
+      return;
+    }
+    var stamp = FEED_DATES[os] || load.releaseDate;
+    var when = null;
+    if (stamp) {
+      var d = new Date(stamp);
+      if (!isNaN(d.getTime())) {
+        try { when = d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }); }
+        catch (e) { when = d.toISOString().slice(0, 10); }
+      }
+    }
+    var version = versionFor(os);
+    note.textContent = version
+      ? "Version " + version + " for " + os + ", read from the release feed" + (when ? " and published " + when : "") + "."
+      : "Build list read from the release feed" + (when ? ", published " + when : "") + ".";
   }
 
   /* ------------------------------------------------------------------ *
@@ -949,42 +1439,97 @@
    * ------------------------------------------------------------------ */
 
   var detected = null;
+  var lastLoad = { source: "fallback", releaseDate: null };
 
-  var OVERRIDES = {
-    "mac-arm64":   { os: "macOS",   arch: "arm64" },
-    "mac-x64":     { os: "macOS",   arch: "x64" },
-    "win-x64":     { os: "Windows", arch: "x64" },
-    "win-arm64":   { os: "Windows", arch: "arm64" },
-    "linux-x64":   { os: "Linux",   arch: "x64" },
-    "linux-arm64": { os: "Linux",   arch: "arm64" }
-  };
+  var OVERRIDE_ORDER = ["macOS", "Windows", "Linux"];
+
+  function parseOverride(value) {
+    var bits = String(value).split(":");
+    return { os: bits[0], arch: bits[1] };
+  }
+
+  // The visitor corrected the platform, not their machine: every measured fact
+  // carries across untouched, and only what the override actually decides is replaced.
+  function withOverride(o) {
+    var info = {};
+    if (detected) {
+      for (var k in detected) {
+        if (Object.prototype.hasOwnProperty.call(detected, k)) info[k] = detected[k];
+      }
+    }
+    info.os = o.os;
+    info.arch = o.arch;
+    info.confidence = "high";
+    info.source = "your choice";
+    info.archEvidence = null;
+    info.osMajor = null;
+    info.osVersion = null;
+    info.osPinned = false;
+    return info;
+  }
 
   overrideEl.addEventListener("change", function () {
     var v = overrideEl.value;
     if (v === "auto") {
-      if (detected) renderPick(detected, primaryFor(detected.os, detected.arch), false);
+      if (detected) {
+        renderFeedNote(lastLoad, detected.os);
+        renderSpecs(detected);
+        renderPick(detected, primaryFor(detected.os, detected.arch), false);
+      }
       return;
     }
-    var o = OVERRIDES[v];
-    // Carry the measured facts across: the visitor corrected the OS guess, not their RAM.
-    var info = {
-      os: o.os, arch: o.arch, confidence: "high", source: "your choice",
-      memory: detected ? detected.memory : null,
-      cores: detected ? detected.cores : null,
-      gpu: detected ? detected.gpu : null,
-      osMajor: null, osVersion: null, osPinned: false
-    };
-    renderPick(info, primaryFor(o.os, o.arch), true);
+    var info = withOverride(parseOverride(v));
+    renderFeedNote(lastLoad, info.os);
+    renderSpecs(info);
+    renderPick(info, primaryFor(info.os, info.arch), true);
   });
 
-  renderAllBuilds();
+  var copyBtn = document.getElementById("copy-specs");
+  copyBtn.addEventListener("click", function () {
+    var info = detected || { os: null, confidence: "low", source: "unavailable" };
+    if (overrideEl.value !== "auto") info = withOverride(parseOverride(overrideEl.value));
+    var label = copyBtn.textContent;
+    copyText(specsAsText(info)).then(function () {
+      copyBtn.textContent = "Copied";
+    }).catch(function () {
+      copyBtn.textContent = "Press \u2318/Ctrl+C to copy";
+    }).then(function () {
+      setTimeout(function () { copyBtn.textContent = label; }, 2000);
+    });
+  });
 
-  detect().then(function (info) {
+  function settle(promise, fallback) {
+    return promise.then(null, function () { return fallback; });
+  }
+
+  Promise.all([
+    settle(detect(), { os: null, confidence: "low", source: "unavailable" }),
+    settle(loadBuilds(), { source: "fallback", releaseDate: null })
+  ]).then(function (both) {
+    var info = both[0], load = both[1];
+    if (load.source !== "feed" && !BUILDS.length) {
+      BUILDS = FALLBACK_FILES.map(function (f) { return describeArtifact(f.os, f.file, null, null); })
+                             .filter(Boolean);
+    }
+
     detected = info;
+    lastLoad = load;
+    renderAllBuilds();
+    renderOverrides();
+    renderFeedNote(load, info.os);
     renderSpecs(info);
     renderPick(info, primaryFor(info.os, info.arch), false);
-  }).catch(function () {
-    renderPick({ os: null, confidence: "low", source: "unavailable" }, null, false);
+
+    // Storage and the WebGPU adapter answer later than the rest, so the readout
+    // paints first and each row fills itself in when its probe returns. Neither
+    // is allowed to hold up the download button.
+    if (navigator.gpu) info.webgpu = null;
+    function refresh() { if (detected === info && overrideEl.value === "auto") renderSpecs(info); }
+    probeStorage(info).then(refresh);
+    probeWebGpu(info).then(function () {
+      if (info.webgpu == null) info.webgpu = false;
+      refresh();
+    });
   });
 })();
 </script>
