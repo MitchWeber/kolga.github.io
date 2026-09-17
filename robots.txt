@@ -1,0 +1,4 @@
+# Kolga's download page is handed out by link, not meant to be found in search.
+# Every well-behaved crawler is asked to stay off the whole site.
+User-agent: *
+Disallow: /
