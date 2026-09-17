@@ -1,0 +1,8 @@
+# GitHub Pages builds this site with Jekyll, and Jekyll publishes every file it
+# is not told to skip. The plaintext page and the build script must never be
+# served: index.html is the encrypted copy, and src/index.html is the same page
+# in the clear.
+exclude:
+  - src
+  - tools
+  - README.md

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- The gate is the only page a crawler can reach, and it should not be indexed. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Kolga</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20220%20200'%20width='220'%20height='200'%3E%3Crect%20width='220'%20height='200'%20fill='%232e2018'%3E%3C/rect%3E%3Cg%20transform='translate(110,100)%20rotate(-30)%20translate(-75,-40)'%3E%3Cpath%20d='M2,0%20h85%20a9,9%200%200%201%200,18%20h-85%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3Cpath%20d='M110,0%20h15%20a9,9%200%200%201%200,18%20h-15%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b98f7e'%3E%3C/path%3E%3Cpath%20d='M16,31%20h67%20a9,9%200%200%201%200,18%20h-67%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M106,31%20h33%20a9,9%200%200%201%200,18%20h-33%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M30,62%20h53%20a9,9%200%200%201%200,18%20h-53%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b3a08f'%3E%3C/path%3E%3Cpath%20d='M106,62%20h47%20a9,9%200%200%201%200,18%20h-47%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3C/g%3E%3C/svg%3E">
+<style>
+  /* The gate carries its own copy of the palette: it has to stand on its own
+     before a single byte of the real page has been decrypted. */
+  :root {
+    color-scheme: light;
+    --bg: #fcfcfe;              --bg: oklch(0.992 0.002 285);
+    --surface: #ffffff;         --surface: oklch(1 0 0);
+    --border: #e2e2e6;          --border: oklch(0.915 0.005 285);
+    --border-strong: #d0d0d5;   --border-strong: oklch(0.86 0.007 285);
+    --text: #1c1c22;            --text: oklch(0.23 0.012 285);
+    --text-dim: #717178;        --text-dim: oklch(0.55 0.012 285);
+    --accent: #a85836;          --accent: oklch(0.55 0.115 43);
+    --accent-text: #fcfcfc;     --accent-text: oklch(0.99 0 0);
+    --danger: #be2323;          --danger: oklch(0.52 0.19 27);
+    --logo-cream: #2e2018;
+    --radius: 0.7rem;
+    --shadow: 0 1px 2px rgba(0,0,0,0.06), 0 8px 24px -12px rgba(0,0,0,0.18);
+    --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #18181c;              --bg: oklch(0.21 0.008 285);
+      --surface: #212126;         --surface: oklch(0.25 0.01 285);
+      --border: rgba(255,255,255,0.09);        --border: oklch(1 0 0 / 9%);
+      --border-strong: rgba(255,255,255,0.16); --border-strong: oklch(1 0 0 / 16%);
+      --text: #f1f1f5;            --text: oklch(0.96 0.005 285);
+      --text-dim: #a3a4ac;        --text-dim: oklch(0.72 0.012 285);
+      --accent: #c98b72;          --accent: oklch(0.692 0.084 43);
+      --accent-text: #1e130d;     --accent-text: oklch(0.2 0.022 48);
+      --danger: #ff6367;          --danger: oklch(0.7 0.19 22);
+      --logo-cream: #f5efe3;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -14px rgba(0,0,0,0.55);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px;
+    background: var(--bg); color: var(--text);
+    font: 15px/1.55 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .gate { width: 100%; max-width: 380px; }
+  .mark {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-weight: 620; letter-spacing: -0.01em;
+  }
+  .mark .glyph { width: 30px; height: 30px; flex: none; }
+  h1 {
+    font-size: 25px; line-height: 1.15; letter-spacing: -0.02em;
+    margin: 20px 0 8px;
+  }
+  .lede { color: var(--text-dim); margin: 0 0 20px; }
+  form { display: flex; flex-wrap: wrap; gap: 10px; }
+  input[type="password"] {
+    flex: 1 1 190px; min-width: 0;
+    padding: 12px 14px;
+    font: inherit; color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: calc(var(--radius) - 2px);
+    box-shadow: var(--shadow);
+  }
+  input[type="password"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--accent); color: var(--accent-text);
+    border: 1px solid transparent; border-radius: calc(var(--radius) - 2px);
+    padding: 12px 18px; font: inherit; font-weight: 620; cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn[disabled] { opacity: 0.6; cursor: default; filter: none; }
+  .msg { min-height: 1.5em; margin: 14px 0 0; font-size: 14px; color: var(--text-dim); }
+  .msg.bad { color: var(--danger); }
+  .spinner {
+    display: inline-block; vertical-align: -2px; margin-right: 7px;
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid var(--border-strong); border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+  .foot { margin: 22px 0 0; font-size: 13px; color: var(--text-dim); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+<body>
+<main class="gate">
+  <div class="mark">
+    <svg class="glyph" viewBox="10 0 200 200" role="img" aria-label="Kolga logo">
+      <g transform="translate(110,100) rotate(-30) translate(-75,-40)">
+        <path d="M2,0 h85 a9,9 0 0 1 0,18 h-85 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
+        <path d="M110,0 h15 a9,9 0 0 1 0,18 h-15 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#b98f7e"></path>
+        <path d="M16,31 h67 a9,9 0 0 1 0,18 h-67 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#c98b72"></path>
+        <path d="M106,31 h33 a9,9 0 0 1 0,18 h-33 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#c98b72"></path>
+        <path d="M30,62 h53 a9,9 0 0 1 0,18 h-53 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#b3a08f"></path>
+        <path d="M106,62 h47 a9,9 0 0 1 0,18 h-47 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
+      </g>
+    </svg>
+    <span>Kolga</span>
+  </div>
+
+  <h1>This page is private</h1>
+  <p class="lede">Enter the password to see the downloads.</p>
+
+  <form id="unlock" autocomplete="on">
+    <label class="sr-only" for="pw">Password</label>
+    <input id="pw" name="password" type="password" autocomplete="current-password" autofocus required
+           spellcheck="false" autocapitalize="off" placeholder="Password">
+    <button class="btn" type="submit" id="go">Unlock</button>
+  </form>
+
+  <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+  <noscript>
+    <p class="msg bad">The page is encrypted and unlocking it needs JavaScript.</p>
+  </noscript>
+
+  <p class="foot">The page is decrypted in your browser. The password is never sent anywhere.</p>
+</main>
+
+<script type="application/json" id="payload">__PAYLOAD__</script>
+<script>
+(function () {
+  "use strict";
+
+  var payload = JSON.parse(document.getElementById("payload").textContent);
+  var form = document.getElementById("unlock");
+  var input = document.getElementById("pw");
+  var button = document.getElementById("go");
+  var msg = document.getElementById("msg");
+  var KEY = "kolga.site.password";
+
+  function say(text, bad) {
+    msg.innerHTML = "";
+    msg.className = "msg" + (bad ? " bad" : "");
+    if (!text) return;
+    if (!bad) msg.appendChild(Object.assign(document.createElement("span"), { className: "spinner" }));
+    msg.appendChild(document.createTextNode(text));
+  }
+
+  function bytes(b64) {
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // WebCrypto needs a secure context: https, or localhost while developing.
+  var subtle = window.crypto && window.crypto.subtle;
+  if (!subtle) {
+    say(window.isSecureContext === false
+      ? "This page has to be served over https to decrypt."
+      : "This browser cannot decrypt the page.", true);
+    button.disabled = true;
+    input.disabled = true;
+    return;
+  }
+
+  function unlock(password, quiet) {
+    button.disabled = true;
+    say("Decrypting…", false);
+
+    return subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"])
+      .then(function (base) {
+        return subtle.deriveKey(
+          { name: "PBKDF2", salt: bytes(payload.salt), iterations: payload.iterations, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+      })
+      .then(function (key) {
+        // AES-GCM authenticates as it decrypts, so a wrong password throws here
+        // and there is no separate hash of the password to attack.
+        return subtle.decrypt({ name: "AES-GCM", iv: bytes(payload.iv) }, key, bytes(payload.ciphertext));
+      })
+      .then(function (plaintext) {
+        try { sessionStorage.setItem(KEY, password); } catch (e) {}
+        var html = new TextDecoder().decode(plaintext);
+        // Replacing the document in place keeps the origin and the URL, which the
+        // page needs: it fetches the release feeds from this very directory.
+        document.open();
+        document.write(html);
+        document.close();
+      })
+      .catch(function () {
+        try { sessionStorage.removeItem(KEY); } catch (e) {}
+        button.disabled = false;
+        say(quiet ? "" : "That password did not work.", !quiet);
+        input.select();
+      });
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (input.value) unlock(input.value, false);
+  });
+
+  // A reload inside the same tab should not ask again.
+  var remembered = null;
+  try { remembered = sessionStorage.getItem(KEY); } catch (e) {}
+  if (remembered) unlock(remembered, true);
+  else say("");
+})();
+</script>
+</body>
+</html>
