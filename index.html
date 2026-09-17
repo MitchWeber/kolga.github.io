@@ -3,21 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Download Kolga</title>
+<title>Download Kolga AI</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20220%20200'%20width='220'%20height='200'%3E%3Crect%20width='220'%20height='200'%20fill='%232e2018'%3E%3C/rect%3E%3Cg%20transform='translate(110,100)%20rotate(-30)%20translate(-75,-40)'%3E%3Cpath%20d='M2,0%20h85%20a9,9%200%200%201%200,18%20h-85%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3Cpath%20d='M110,0%20h15%20a9,9%200%200%201%200,18%20h-15%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b98f7e'%3E%3C/path%3E%3Cpath%20d='M16,31%20h67%20a9,9%200%200%201%200,18%20h-67%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M106,31%20h33%20a9,9%200%200%201%200,18%20h-33%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23c98b72'%3E%3C/path%3E%3Cpath%20d='M30,62%20h53%20a9,9%200%200%201%200,18%20h-53%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23b3a08f'%3E%3C/path%3E%3Cpath%20d='M106,62%20h47%20a9,9%200%200%201%200,18%20h-47%20a2,2%200%200%201%20-2,-2%20v-14%20a2,2%200%200%201%202,-2%20z'%20fill='%23f5efe3'%3E%3C/path%3E%3C/g%3E%3C/svg%3E">
-<meta name="description" content="Kolga reads your operating system, CPU, memory and graphics in the browser, shows you what it found, and points you at the matching installer.">
+<meta name="description" content="Kolga AI reads your operating system, CPU, memory and graphics in the browser, shows you what it found, and points you at the matching installer.">
 <style>
-  /* ------------------------------------------------------------------
-     Kolga's palette, lifted from renderer/index.css so the download page
-     and the app are the same product: warm-neutral grays on hue 285 and
-     the terracotta primary drawn from the logo (#c98b72 in dark, the
-     colour of the mark's middle bars).
-
-     Each token is declared twice — a hex/rgba fallback first, then the
-     app's own oklch value. Browsers that do not parse oklch keep the
-     fallback, which matters here because the visitors most likely to run
-     an old browser are exactly the ones this page has to serve.
-     ------------------------------------------------------------------ */
   :root {
     color-scheme: light;
     --bg: #fcfcfe;              --bg: oklch(0.992 0.002 285);
@@ -287,7 +276,7 @@
     <!-- Kolga's mark: the same bars and -30deg rotation as
          renderer/App/components/LogoMark, with the cream bars inverting on a
          dark ground exactly as the app's fill-[#2e2018] dark:fill-[#f5efe3] does. -->
-    <svg class="glyph" viewBox="10 0 200 200" role="img" aria-label="Kolga logo">
+    <svg class="glyph" viewBox="10 0 200 200" role="img" aria-label="Kolga AI logo">
       <g transform="translate(110,100) rotate(-30) translate(-75,-40)">
         <path d="M2,0 h85 a9,9 0 0 1 0,18 h-85 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
         <path d="M110,0 h15 a9,9 0 0 1 0,18 h-15 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="#b98f7e"></path>
@@ -297,10 +286,10 @@
         <path d="M106,62 h47 a9,9 0 0 1 0,18 h-47 a2,2 0 0 1 -2,-2 v-14 a2,2 0 0 1 2,-2 z" fill="var(--logo-cream)"></path>
       </g>
     </svg>
-    <span>Kolga</span>
+    <span>Kolga AI</span>
   </div>
 
-  <h1>Download Kolga</h1>
+  <h1>Download Kolga AI</h1>
   <p class="lede">
     A local-first AI workbench that runs the model on your own machine. Pick a build below &mdash;
     we check what you&rsquo;re running and point at the matching installer.
@@ -326,11 +315,8 @@
 
   <noscript>
     <div class="notice" style="margin-top:22px">
-      JavaScript is off, so nothing can be detected and the build list — which is read from the
-      release feed — stays empty. Kolga needs 8 GB of memory, a 64-bit processor and macOS 11,
-      Windows 10 or glibc 2.28 or newer.
-      <a href="https://github.com/MitchWeber/dev-ai-workbench/releases/latest" rel="noopener">Browse the latest release</a>
-      to pick a file by hand.
+      JavaScript is off, so nothing can be detected. Kolga AI needs 8 GB of memory, a 64-bit
+      processor and macOS 11, Windows 10 or glibc 2.28 or newer. Pick your build from the full list below.
     </div>
   </noscript>
 
@@ -396,7 +382,7 @@
     appName: "Kolga",
     // Where the artifacts live. {version} is filled in per platform, because
     // macOS and Windows do not always ship from the same release.
-    downloadBase: "https://github.com/MitchWeber/dev-ai-workbench/releases/download/v{version}/",
+    downloadBase: "https://ai-workbench-releases-520843832420-eu-central-1-an.s3.eu-central-1.amazonaws.com/releases/",
     feedBase: "",                   // same directory as this page
     feeds: [
       { file: "latest-mac.yml",         os: "macOS" },
@@ -413,8 +399,8 @@
      These are last known good file names, and the version in each name is
      the version the page then shows. */
   var FALLBACK_FILES = [
-    { os: "macOS",   file: "kolga.macOS.0.9.6.arm64.zip" },
-    { os: "macOS",   file: "kolga.macOS.0.9.6.x64.zip" },
+    { os: "macOS",   file: "kolga.macOS.0.9.6.arm64.dmg" },
+    { os: "macOS",   file: "kolga.macOS.0.9.6.x64.dmg" },
     { os: "Windows", file: "kolga.Windows.0.9.5.x64.exe" },
     { os: "Windows", file: "kolga.Windows.0.9.5.arm64.exe" }
   ];
